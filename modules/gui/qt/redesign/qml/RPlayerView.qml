@@ -123,7 +123,10 @@ FocusScope {
         target: DialogsProvider
         function onContextMenuRequested(show) {
             if (show) {
-                const p = windowHover.point.position
+                // the video surface gets the click, not QML: hover handlers do not
+                // know where the cursor is, ask Qt for its global position instead
+                const g = MainCtx.cursorPos()
+                const p = root.mapFromGlobal(g.x, g.y)
                 contextMenu.popup(p.x, p.y)
             } else {
                 contextMenu.close()
