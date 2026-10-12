@@ -1549,11 +1549,25 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RIconButton.qml \
 	redesign/qml/RIdleView.qml \
 	redesign/qml/RKeyField.qml \
+	redesign/qml/RLibHomePage.qml \
+	redesign/qml/RLibMusicPage.qml \
+	redesign/qml/RLibNetworkPage.qml \
+	redesign/qml/RLibPlaylistsPage.qml \
+	redesign/qml/RLibRecentPage.qml \
+	redesign/qml/RLibVideosPage.qml \
+	redesign/qml/RLibraryFolders.qml \
+	redesign/qml/RLibraryHeader.qml \
+	redesign/qml/RLibraryRescan.qml \
+	redesign/qml/RLibrarySidebar.qml \
+	redesign/qml/RLibraryView.qml \
 	redesign/qml/RMainInterface.qml \
 	redesign/qml/RMainMenu.qml \
+	redesign/qml/RMediaMenu.qml \
+	redesign/qml/RMediaView.qml \
 	redesign/qml/RMenu.qml \
 	redesign/qml/RMenuItem.qml \
 	redesign/qml/RMenuSeparator.qml \
+	redesign/qml/RMiniPlayer.qml \
 	redesign/qml/RModuleSwitch.qml \
 	redesign/qml/RNetworkStreamDialog.qml \
 	redesign/qml/RNewPlaylistDialog.qml \

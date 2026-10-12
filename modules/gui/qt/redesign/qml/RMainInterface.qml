@@ -91,6 +91,11 @@ Item {
             Qt.callLater(RWindows.newPlaylistRequested)
         else if (open.startsWith("subtitles"))
             Qt.callLater(RWindows.addSubtitlesRequested, open.substring(10))
+        else if (open.startsWith("library")) {
+            root.libraryMode = true
+            if (open.length > 8)
+                Qt.callLater(library.openPage, open.substring(8))
+        }
         else if (open.startsWith("effects"))
             Qt.callLater(playerView.openEffects, open === "effects:audio" ? 1 : 0)
     }
@@ -165,10 +170,51 @@ Item {
         }
     }
 
+    // ---- library / player
+    property bool libraryMode: false
+
+    RLibraryView {
+        id: library
+        anchors.fill: parent
+        visible: root.libraryMode
+        onBackToPlayer: root.libraryMode = false
+    }
+
+    // card of the mini player, around the video shown by playerView
+    RMiniPlayer {
+        visible: root.libraryMode && Player.isStarted
+        videoRect: library.miniPlayerRect
+        onExpandRequested: root.libraryMode = false
+        onQueueRequested: { root.libraryMode = false; playerView.togglePanel("queue", 0) }
+    }
+
     RPlayerView {
         id: playerView
-        anchors.fill: parent
-        focus: true
+        focus: !root.libraryMode
+        mini: root.libraryMode
+        visible: !root.libraryMode || Player.isStarted
+        x: root.libraryMode ? library.miniPlayerRect.x : 0
+        y: root.libraryMode ? library.miniPlayerRect.y : 0
+        width: root.libraryMode ? library.miniPlayerRect.width : root.width
+        height: root.libraryMode ? library.miniPlayerRect.height : root.height
+        onLibraryRequested: (page) => {
+            root.libraryMode = true
+            if (page.length > 0)
+                library.openPage(page)
+        }
+
+    }
+
+    // a click on the small video goes back to the player (above the video surface,
+    // which takes the mouse for the video output)
+    MouseArea {
+        visible: root.libraryMode && Player.isStarted
+        x: library.miniPlayerRect.x
+        y: library.miniPlayerRect.y
+        width: library.miniPlayerRect.width
+        height: library.miniPlayerRect.height
+        cursorShape: Qt.PointingHandCursor
+        onClicked: root.libraryMode = false
     }
 
     Loader {

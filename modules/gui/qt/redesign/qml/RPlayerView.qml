@@ -34,7 +34,14 @@ FocusScope {
 
     readonly property bool hasVideo: MainCtx.hasEmbededVideo
     readonly property bool playing: Player.playingState === Player.PLAYING_STATE_PLAYING
-    readonly property bool hideUi: MainCtx.minimalView
+    // shown small in the corner of the library (mini player): no bars, no panels
+    property bool mini: false
+    readonly property bool hideUi: MainCtx.minimalView || mini
+
+    // page: "" (last page) or a library page ("videos"...)
+    signal libraryRequested(string page)
+
+    onMiniChanged: if (mini) openPanel = ""
 
     // bars are pinned while nothing plays, a panel is open or a menu is shown
     readonly property bool pinned: !hasVideo || !playing || openPanel !== ""
@@ -129,7 +136,7 @@ FocusScope {
     Connections {
         target: DialogsProvider
         function onContextMenuRequested(show) {
-            if (show) {
+            if (show && !root.mini) {
                 // the video surface gets the click, not QML: hover handlers do not
                 // know where the cursor is, ask Qt for its global position instead
                 const g = MainCtx.cursorPos()
@@ -174,6 +181,16 @@ FocusScope {
         HoverHandler { id: topHover }
 
         onMenuRequested: mainMenu.popup(menuButton, 0, menuButton.height + Theme.dp(6))
+
+        // library: sidebar button and folder of the current media (Figma "Player-6")
+        libraryAvailable: true
+        locationName: {
+            const u = String(Player.url || "")
+            const parts = u.split("/")
+            return parts.length > 1 ? decodeURIComponent(parts[parts.length - 2]) : qsTr("Library")
+        }
+        onSidebarToggled: root.libraryRequested("")
+        onLocationClicked: root.libraryRequested("videos")
     }
 
     RControlBar {
