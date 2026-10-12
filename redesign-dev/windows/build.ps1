@@ -4,7 +4,7 @@
 #   powershell -ExecutionPolicy Bypass -File redesign-dev\windows\build.ps1 [-Reconfigure] [-Clean] [-Release] [-Jobs N]
 #     -Reconfigure  rerun meson setup in the existing tree (new contribs, changed meson.build options)
 #     -Clean        delete the build tree and configure from scratch
-#     -Release      release build instead of debugoptimized
+#     -Release      separate release tree build\win64-release, stripped result in build\vlc-release
 #
 # Build tree: <repo>\..\build\win64-native, result: <repo>\..\build\vlc\vlc.exe
 param([switch]$Reconfigure, [switch]$Clean, [switch]$Release, [int]$Jobs = 0)
@@ -13,8 +13,8 @@ $ErrorActionPreference = 'Stop'
 $Repo  = (Resolve-Path "$PSScriptRoot\..\..").Path
 $Build = Join-Path (Split-Path $Repo -Parent) 'build'
 $Contrib = "$Build\contrib\x86_64-w64-mingw32"
-$BuildDir = "$Build\win64-native"
-$Out = "$Build\vlc"
+$BuildDir = if ($Release) { "$Build\win64-release" } else { "$Build\win64-native" }
+$Out = if ($Release) { "$Build\vlc-release" } else { "$Build\vlc" }
 if (-not (Test-Path "$Build\native.ini")) { throw 'run redesign-dev\windows\setup.ps1 first' }
 
 # GCC, ninja/meson/pkgconf and the contrib tools (luac, qmake6) first in PATH
@@ -24,6 +24,8 @@ $env:PKG_CONFIG_LIBDIR = "$Contrib\lib\pkgconfig"
 $env:PKG_CONFIG_PATH = ''
 $Meson = "$Build\pyenv\Scripts\meson.exe"
 $BuildType = if ($Release) { 'release' } else { 'debugoptimized' }
+# the VideoLAN update check would offer the official VLC to the users of this fork
+$UpdateCheck = if ($Release) { 'disabled' } else { 'enabled' }
 
 function Step($msg) { Write-Host "[build] $msg" -ForegroundColor Cyan }
 
@@ -45,12 +47,10 @@ if ($Reconfigure -or -not $configured) {
         -Dlua=enabled -Dflac=enabled -Dtheoradec=enabled -Dtheoraenc=enabled `
         -Davcodec=enabled -Dmerge-ffmpeg=true -Dlibass=enabled -Dshout=enabled `
         -Dgoom2=enabled -Dsse=enabled -Dzvbi=enabled -Dtelx=disabled `
-        -Dqt=enabled -Dskins2=enabled -Dupdate-check=enabled `
-        -Dwix=disabled -Dnsis=disabled
+        -Dqt=enabled -Dskins2=enabled `
+        -Dwix=disabled -Dnsis=disabled `
+        "-Dupdate-check=$UpdateCheck"
     if ($LASTEXITCODE) { throw 'meson setup failed' }
-} elseif ($Release) {
-    & $Meson configure $BuildDir --buildtype release
-    if ($LASTEXITCODE) { throw 'meson configure failed' }
 }
 
 Step 'compiling'
@@ -60,7 +60,9 @@ if ($Jobs -gt 0) { $jobArgs += '-j', $Jobs }
 if ($LASTEXITCODE) { throw 'compilation failed' }
 
 Step "installing to $Out"
-& $Meson install -C $BuildDir --no-rebuild --quiet
+$installArgs = @('--no-rebuild', '--quiet')
+if ($Release) { $installArgs += '--strip' }
+& $Meson install -C $BuildDir @installArgs
 if ($LASTEXITCODE) { throw 'install failed' }
 
 # plugin cache, like the official packages (faster startup)
