@@ -12,6 +12,7 @@ Key points:
 - Option `qt-redesign` (default on), `--no-qt-redesign` restores the classic UI.
 - Icons: `#FF00FF` main color, `#FF8800` accent, rendered by `image://redesignicon/` (synchronous on purpose).
 - Design references: `C:\Projects\VLC\RedesignSources\` (FigmaExport PNG/SVG, video, transcript).
-- Build on Windows: `redesign-dev\setup.bat` once, then `redesign-dev\build.bat`, run with `redesign-dev\run.bat`.
+- Build on Windows natively (no WSL/MSYS): `redesign-dev\setup.bat` once, then `redesign-dev\build.bat`,
+  run with `redesign-dev\run.bat`. Details and troubleshooting: `redesign-dev\BUILD-WINDOWS.md`.
 - Keep meson.build and Makefile.am in sync when adding QML files or icons.
 - The user speaks Russian.

@@ -121,8 +121,11 @@ if lua_dep.found() and get_option('lua').allowed()
     '../../share/lua/sd/jamendo.lua',
   )
 
+  # full_path() uses backslashes on Windows hosts
+  lua_src_prefix = (vlc_src_root / 'share/lua/').replace('\\', '/')
+
   foreach m : lua_modules
-    module_path = m.full_path().replace(vlc_src_root / 'share/lua/', '')
+    module_path = m.full_path().replace('\\', '/').replace(lua_src_prefix, '')
     build_name = module_path.replace('.lua', '').underscorify()
     splitpath = module_path.split('/')
     output = splitpath.get(splitpath.length() - 1).replace('.lua', '.luac')
@@ -202,7 +205,7 @@ if lua_dep.found() and get_option('lua').allowed()
   )
 
   foreach m : lua_pkgdata
-    splitpath = m.full_path().replace(vlc_src_root / 'share/lua/', '').split('/')
+    splitpath = m.full_path().replace('\\', '/').replace(lua_src_prefix, '').split('/')
     subdir = '/'.join(splitpath.slice(0, splitpath.length() - 1))
     install_data(m, install_dir: lua_pkgdata_install_dir / subdir)
   endforeach
