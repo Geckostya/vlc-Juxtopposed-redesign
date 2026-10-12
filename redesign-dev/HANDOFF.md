@@ -143,6 +143,18 @@ A-B, снимок, запись, реверс), `RQueuePanel` (Queue/Bookmarks/C
 - Не сделано по макетам: вложенные папки (медиатека отдаёт плоский список папок), музыкальный
   плеер `Player - Music`, «Sorting/View Options» как отдельные попапы, полноэкранный сайдбар.
 
+### Этап 5 (часть): онбординг и кастомизация
+- `ROnboarding` — при первом запуске редизайна (флаг `Redesign/onboardingDone` в Qt-настройках):
+  приветствие и папка медиатеки, тема и акцент, основные клавиши (из конфига горячих клавиш).
+- `RCustomizeDialog` («Customize Player» в меню «…»): перетаскивание контролов из коробки в
+  полосу панели, перестановка, удаление перетаскиванием обратно. Список хранится в
+  `Redesign/controlbarExtras` (синглтон `RBarCatalog`), контролы рисует `RBarItem` в `RControlBar`
+  между громкостью и кнопкой аудио.
+- Хуки: `--qt-redesign-open=onboarding|customize|extras:id1,id2` (последний — без сохранения).
+- Qt-настройки на Windows лежат в `%APPDATA%\vlc\vlc-qt-interface.ini` (путь берётся из
+  `config_GetUserDir`, подмена `APPDATA` для теста не помогает).
+- Не сделано: профили (меню «Profile» с наборами настроек), верхняя панель в кастомизации.
+
 ### Сборка, релиз
 - Нативная сборка под Windows, раздел 4.
 - **Релиз vlc-redesign-0.1.0 (Windows x64) опубликован** владельцем:
@@ -159,9 +171,9 @@ A-B, снимок, запись, реверс), `RQueuePanel` (Queue/Bookmarks/C
 ### Не проверено / известные упрощения
 - Управление громкостью мышью, автоскрытие баров при обычном использовании — проверяет владелец.
 - Живые эффекты проверены только на открытие панелей, не на слух/глаз.
-- «Customize Player» открывает старое окно (этап 5). Пункты Video/Audio/Subtitle в ПКМ открывают
+- Пункты Video/Audio/Subtitle в ПКМ открывают
   попап дорожек, а не подменю.
-- HDR-опции, профили, онбординг не сделаны.
+- HDR-опции и профили не сделаны.
 - Сборка через autotools не проверялась (Makefile.am поддерживается).
 
 ## 4. Сборка и запуск на Windows
@@ -208,7 +220,7 @@ A-B, снимок, запись, реверс), `RQueuePanel` (Queue/Bookmarks/C
 | Этап | Что | Источник в FigmaExport |
 |------|-----|------------------------|
 | 2+ | Остатки библиотеки: музыкальный плеер, попапы сортировки и вида, контекстные меню плейлистов/папок по макету, отдельный миниплеер-окно | `Player - Music*.png`, `Miniplayer.png`, `Sorting Options`, `View Options`, `*context menu.png` |
-| 5 | Онбординг, кастомизация панели drag-and-drop, профили, светлая тема по макету `Player - Light`, «hide UI» | `Onboarding*.png`, `Player - customize*.png`, `Profiles.png`, `Player - Light.png`, `Player - hide UI.png` |
+| 5+ | Профили, кастомизация верхней панели, сверка светлой темы с `Player - Light`, «hide UI» | `Profiles.png`, `Player - customize-1..8.png`, `Player - Light.png`, `Player - hide UI.png` |
 | 4+ | Остатки эффектов: HDR-опции, пресеты настроек («Setting Preset»), визуализатор, таймлайн субтитров | `HDR Options.png`, `Setting Preset.png`, `Audio Visualizer.png`, `sub filename.png`, `subtitle one/multiple.png` |
 
 Медиатека в Windows-сборке есть (приходит с контрибами).
