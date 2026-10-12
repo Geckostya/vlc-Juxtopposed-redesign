@@ -137,6 +137,19 @@ Rectangle {
             RVolumeCone { }
         }
 
+        // --- controls placed with "Customize Player" ------------------------
+        RowLayout {
+            spacing: Theme.dp(8)
+            visible: RBarCatalog.extras.length > 0
+            Repeater {
+                model: RBarCatalog.extras
+                delegate: RBarItem {
+                    required property string modelData
+                    itemId: modelData
+                }
+            }
+        }
+
         // --- tracks / settings --------------------------------------------
         RowLayout {
             spacing: Theme.dp(12)

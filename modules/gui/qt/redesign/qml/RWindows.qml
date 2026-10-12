@@ -26,6 +26,11 @@ QtObject {
     signal shortcutsRequested()
     // tab: 0 video effects, 1 audio effects (tracks popup of the player)
     signal effectsRequested(int tab)
+    // a panel of the player ("queue", "playback"...) with its tab
+    signal panelRequested(string name, int tab)
+    // the library on a page ("home", "playlists"...)
+    signal libraryRequested(string page)
+    signal customizeRequested()
     signal networkStreamRequested()
     signal newPlaylistRequested()
     // url: a media of the folder to pair with subtitles ("" = ask for the folder)

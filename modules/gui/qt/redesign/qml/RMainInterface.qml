@@ -91,6 +91,15 @@ Item {
             Qt.callLater(RWindows.newPlaylistRequested)
         else if (open.startsWith("subtitles"))
             Qt.callLater(RWindows.addSubtitlesRequested, open.substring(10))
+        else if (open.startsWith("extras:")) {
+            // control bar extras for this run only (not saved): extras:back10,fwd10
+            RBarCatalog.extras = open.substring(7).split(",")
+            onboarding.active = false
+        }
+        else if (open === "customize")
+            Qt.callLater(RWindows.customizeRequested)
+        else if (open === "onboarding")
+            onboarding.active = true
         else if (open.startsWith("library")) {
             root.libraryMode = true
             if (open.length > 8)
@@ -100,6 +109,7 @@ Item {
             Qt.callLater(playerView.openEffects, open === "effects:audio" ? 1 : 0)
     }
 
+    Loader { id: customizeLoader; active: false; sourceComponent: RCustomizeDialog { transientParent: root.Window.window } }
     Loader { id: networkLoader; active: false; sourceComponent: RNetworkStreamDialog { transientParent: root.Window.window } }
     Loader { id: newPlaylistLoader; active: false; sourceComponent: RNewPlaylistDialog { transientParent: root.Window.window } }
     Loader { id: addSubtitlesLoader; active: false; sourceComponent: RAddSubtitlesDialog { transientParent: root.Window.window } }
@@ -108,7 +118,10 @@ Item {
         target: RWindows
         function onSettingsRequested(category) { root.openSettings(category) }
         function onShortcutsRequested() { root.openShortcuts() }
-        function onEffectsRequested(tab) { playerView.openEffects(tab) }
+        function onEffectsRequested(tab) { root.libraryMode = false; playerView.openEffects(tab) }
+        function onPanelRequested(name, tab) { root.libraryMode = false; playerView.togglePanel(name, tab) }
+        function onLibraryRequested(page) { root.libraryMode = true; library.openPage(page) }
+        function onCustomizeRequested() { customizeLoader.active = true; customizeLoader.item.open() }
         function onNetworkStreamRequested() { networkLoader.active = true; networkLoader.item.open() }
         function onNewPlaylistRequested() { newPlaylistLoader.active = true; newPlaylistLoader.item.open() }
         function onAddSubtitlesRequested(url) { addSubtitlesLoader.active = true; addSubtitlesLoader.item.openFor(url) }
@@ -203,6 +216,17 @@ Item {
                 library.openPage(page)
         }
 
+    }
+
+    // first start: welcome, theme and accent, basic shortcuts
+    Loader {
+        id: onboarding
+        anchors.fill: parent
+        z: 50
+        active: String(MainCtx.settingValue("Redesign/onboardingDone", false)) !== "true"
+        sourceComponent: ROnboarding {
+            onFinished: onboarding.active = false
+        }
     }
 
     // a click on the small video goes back to the player (above the video surface,

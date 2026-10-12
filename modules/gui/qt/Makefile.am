@@ -1530,6 +1530,7 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RAddSubtitlesDialog.qml \
 	redesign/qml/RAdvancedOptions.qml \
 	redesign/qml/RAudioEffects.qml \
+	redesign/qml/RBarItem.qml \
 	redesign/qml/RButton.qml \
 	redesign/qml/RCheckItem.qml \
 	redesign/qml/RChip.qml \
@@ -1539,6 +1540,7 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RContextMenu.qml \
 	redesign/qml/RControlBar.qml \
 	redesign/qml/RCropEditor.qml \
+	redesign/qml/RCustomizeDialog.qml \
 	redesign/qml/RDashedLine.qml \
 	redesign/qml/RDialogWindow.qml \
 	redesign/qml/RDropdown.qml \
@@ -1571,6 +1573,7 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RModuleSwitch.qml \
 	redesign/qml/RNetworkStreamDialog.qml \
 	redesign/qml/RNewPlaylistDialog.qml \
+	redesign/qml/ROnboarding.qml \
 	redesign/qml/ROption.qml \
 	redesign/qml/RPanelButton.qml \
 	redesign/qml/RPlaybackPopup.qml \
@@ -1617,6 +1620,7 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RVolumeCone.qml \
 	redesign/qml/RWindowButton.qml
 libqml_module_redesign_a_Singleton_QML = \
+	redesign/qml/RBarCatalog.qml \
 	redesign/qml/RWindows.qml \
 	redesign/qml/Theme.qml
 libqml_module_redesign_a_SOURCES = $(QML_MODULE_redesign_SRC)

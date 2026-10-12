@@ -8,7 +8,7 @@ import os
 import re
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'modules', 'gui', 'qt')
-SINGLETONS = ['Theme.qml', 'RWindows.qml']
+SINGLETONS = ['Theme.qml', 'RWindows.qml', 'RBarCatalog.qml']
 
 
 def main():
