@@ -124,12 +124,30 @@ Linux-сборка в облаке (Ubuntu 24.04, Qt 6.4, meson), запуск �
 
 ### Известные упрощения этапа 1
 
-- «Keyboard Shortcuts» и «Customize Player» в меню «…» открывают старые окна VLC.
+- «Customize Player» в меню «…» открывает старое окно VLC (этап 5).
 - Пункты Video / Audio / Subtitle в меню правой кнопки открывают попап дорожек, а не подменю.
 - Кнопка сайдбара библиотеки и «папка» в верхней панели скрыты
   (`RTopBar.libraryAvailable: false`) до этапа 2.
 - В экспорте не было иконки «check» по умолчанию, `check.svg` взят из состояния «active».
   `repeat_one`, `trash`, `media`, `playing`, `tab_*` нарисованы или взяты из других фреймов.
+
+## 3.1. Этапы 3 и 4 (2026-10-13): настройки, горячие клавиши, эффекты, диалоги
+
+| Что | Файлы |
+|-----|-------|
+| Окно настроек: поиск, 13 категорий, «Advanced Options» со всеми прочими опциями области | `RSettingsWindow.qml`, `RSettings<Категория>.qml`, `RSettingsPage`, `ROption`, `RAdvancedOptions`, контролы `RSwitch`, `RDropdown`, `RSegmented`, `RTickSlider`, `RTextField`, `RColorField`, `RAccentPicker`, `RModuleSwitch` |
+| Мост к конфигу VLC (описание опций, значения, поиск, горячие клавиши, нативные диалоги выбора) | `redesign/redesign_settings.*` (синглтон `RedesignSettings`) |
+| Окно горячих клавиш | `RShortcutsWindow.qml`, `RKeyField.qml` |
+| Живые эффекты видео/аудио в попапе дорожек (кнопки внизу попапа) | `RVideoEffects`, `RAudioEffects`, `RCollapsible`, `REffectSlider`, `RFilterSwitch`, `RCropEditor`, `REqualizerBands`; C++: `redesign/redesign_effects.*` (`RedesignEffects`) |
+| Диалоги: сетевой поток, новый плейлист, субтитры к папке | `RDialogWindow`, `RNetworkStreamDialog`, `RNewPlaylistDialog`, `RAddSubtitlesDialog`, `RPlaylistSaver` |
+| Запросы окон из любого места | синглтон `RWindows.qml`; окна создаёт `RMainInterface` |
+
+- Тема (тёмная/светлая/системная) и акцент хранятся в Qt-настройках (`Redesign/theme`, `Redesign/accent`), см. `Theme.qml`.
+- С редизайном `DialogsProvider::prefsDialog()` открывает новое окно; классическое — `classicPrefsDialog()` (Settings > General).
+- Для скриншотов: `vlc --qt-redesign-open=settings:<категория>|shortcuts|network|playlist|subtitles:<url>|effects:video|effects:audio`.
+- Canvas в Qt из контрибов нет: пунктир рисует `RDashedLine`.
+- Новые QML-файлы добавлять в списки командой `python redesign-dev/tools/sync_qml_lists.py`.
+- Не сделано: HDR-опции, профили, онбординг, кастомизация панели (этап 5), библиотека (этап 2).
 
 ## 4. Сборка и запуск на Windows
 
