@@ -126,6 +126,23 @@ A-B, снимок, запись, реверс), `RQueuePanel` (Queue/Bookmarks/C
   по имени или S01E05, «Play with subtitles»), `RPlaylistSaver` (грузится Loader'ом: модуль
   `VLC.MediaLibrary` есть только с медиатекой).
 
+### Этап 2: библиотека и миниплеер
+- `RLibraryView` (сайдбар `RLibrarySidebar`, шапка `RLibraryHeader`: назад/вперёд, хлебные крошки,
+  сортировка, сетка/список, поиск, меню), маршрут `{page, title, params, crumbs}` и своя история.
+- Страницы: `RLibHomePage` (Continue Watching, Play Again, New Music, Video Folders),
+  `RLibVideosPage` (папки → видео, «All videos»), `RLibMusicPage` (альбомы/артисты/треки/жанры),
+  `RLibNetworkPage` (компьютер, устройства, сеть → папки), `RLibPlaylistsPage`, `RLibRecentPage`.
+- `RMediaView` — общая сетка плиток 16:9 (или квадратных) с прогрессом / компактный список;
+  `RMediaMenu` — ПКМ (воспроизвести, в очередь, отметить просмотренным).
+- Вход: кнопка сайдбара и «папка» в верхней панели плеера. В библиотеке играющее видео
+  показывает миниплеер `RMiniPlayer`: сам `RPlayerView` переносится в прямоугольник карточки
+  (`mini: true`), клик по видео возвращает в плеер.
+- Модули медиатеки грузятся только при включённой медиатеке (`RLibraryFolders`, `RLibraryRescan`
+  и страницы через Loader); без неё работает только Network.
+- `--qt-redesign-open=library:<page>` открывает библиотеку при старте.
+- Не сделано по макетам: вложенные папки (медиатека отдаёт плоский список папок), музыкальный
+  плеер `Player - Music`, «Sorting/View Options» как отдельные попапы, полноэкранный сайдбар.
+
 ### Сборка, релиз
 - Нативная сборка под Windows, раздел 4.
 - **Релиз vlc-redesign-0.1.0 (Windows x64) опубликован** владельцем:
@@ -144,7 +161,7 @@ A-B, снимок, запись, реверс), `RQueuePanel` (Queue/Bookmarks/C
 - Живые эффекты проверены только на открытие панелей, не на слух/глаз.
 - «Customize Player» открывает старое окно (этап 5). Пункты Video/Audio/Subtitle в ПКМ открывают
   попап дорожек, а не подменю.
-- HDR-опции, профили, онбординг, библиотека не сделаны.
+- HDR-опции, профили, онбординг не сделаны.
 - Сборка через autotools не проверялась (Makefile.am поддерживается).
 
 ## 4. Сборка и запуск на Windows
@@ -190,9 +207,8 @@ A-B, снимок, запись, реверс), `RQueuePanel` (Queue/Bookmarks/C
 
 | Этап | Что | Источник в FigmaExport |
 |------|-----|------------------------|
-| 2 | Сайдбар библиотеки (компактный в плеере и полный экран), Home, Videos/Music/Network/Playlists/Recent, музыкальный плеер, миниплеер, сортировка и вид, «unviewed/viewed», контекстные меню файлов/папок/плейлистов | `Player-1..6.png`, `Player - Music*.png`, `Miniplayer.png`, `Sorting Options`, `View Options`, `*context menu.png`, `sidebar.png`, `media.png`, `thumbnail.png` |
+| 2+ | Остатки библиотеки: музыкальный плеер, попапы сортировки и вида, контекстные меню плейлистов/папок по макету, отдельный миниплеер-окно | `Player - Music*.png`, `Miniplayer.png`, `Sorting Options`, `View Options`, `*context menu.png` |
 | 5 | Онбординг, кастомизация панели drag-and-drop, профили, светлая тема по макету `Player - Light`, «hide UI» | `Onboarding*.png`, `Player - customize*.png`, `Profiles.png`, `Player - Light.png`, `Player - hide UI.png` |
 | 4+ | Остатки эффектов: HDR-опции, пресеты настроек («Setting Preset»), визуализатор, таймлайн субтитров | `HDR Options.png`, `Setting Preset.png`, `Audio Visualizer.png`, `sub filename.png`, `subtitle one/multiple.png` |
 
-В `RTopBar` кнопка сайдбара и «папка» скрыты флагом `libraryAvailable: false` — включить на этапе 2.
 Медиатека в Windows-сборке есть (приходит с контрибами).
