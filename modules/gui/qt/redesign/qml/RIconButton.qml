@@ -26,6 +26,8 @@ T.AbstractButton {
     property color iconColor: checked ? Theme.accent : Theme.text
     property int iconSize: Theme.iconSize
     property string toolTip
+    // shows the hover state when a larger area around the button is hovered
+    property bool forceHovered: false
 
     implicitWidth: iconSize + Theme.dp(6)
     implicitHeight: iconSize + Theme.dp(6)
@@ -39,7 +41,7 @@ T.AbstractButton {
     background: Rectangle {
         radius: Theme.radiusSmall
         color: root.pressed ? Theme.pressed
-             : (root.hovered || root.visualFocus) ? Theme.hover
+             : (root.hovered || root.forceHovered || root.visualFocus) ? Theme.hover
              : "transparent"
         Behavior on color { ColorAnimation { duration: Theme.durationShort } }
     }

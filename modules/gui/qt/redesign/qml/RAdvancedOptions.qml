@@ -29,7 +29,8 @@ Column {
     property var subcats: []          // vlc_config_subcat values
     property var exclude: []          // option names already shown on the page (default: the
                                       // ROption rows of the enclosing RSettingsPage)
-    property bool expanded: false
+    // --qt-redesign-open=settings:<category>:advanced opens it expanded (testing)
+    property bool expanded: RedesignSettings.inheritedString("qt-redesign-open").endsWith(":advanced")
 
     function excludedNames() {
         if (exclude.length > 0)

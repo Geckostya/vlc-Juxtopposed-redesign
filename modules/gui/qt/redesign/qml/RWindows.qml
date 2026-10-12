@@ -24,6 +24,8 @@ import QtQuick
 QtObject {
     signal settingsRequested(string category)
     signal shortcutsRequested()
+    // tab: 0 video effects, 1 audio effects (tracks popup of the player)
+    signal effectsRequested(int tab)
     signal networkStreamRequested()
     signal newPlaylistRequested()
     // url: a media of the folder to pair with subtitles ("" = ask for the folder)

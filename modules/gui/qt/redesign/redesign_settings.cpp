@@ -299,8 +299,12 @@ QVariantList RedesignSettings::advancedOptions(const QVariantList &subcats,
                     flush();
                 subcat = item->value.i;
                 if (isCore)
-                    group["title"] = tr8(vlc_config_subcat_GetName(
-                                         static_cast<vlc_config_subcat>(subcat)));
+                {
+                    // vlc_config_subcat_GetName() would pass a NULL name to vlc_gettext()
+                    const config_subcategory_t *sc =
+                        vlc_config_subcat_Find(static_cast<vlc_config_subcat>(subcat));
+                    group["title"] = (sc && sc->name) ? tr8(sc->name) : qtr("Core");
+                }
                 continue;
             }
             if (!wanted.contains(subcat) || !visibleType(item->i_type))

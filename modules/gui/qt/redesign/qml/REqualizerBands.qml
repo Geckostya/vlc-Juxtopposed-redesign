@@ -27,6 +27,10 @@ Item {
     property var bands: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     readonly property var labels: ["60 Hz", "170 Hz", "310 Hz", "600 Hz", "1 KHz",
                                    "3 KHz", "6 KHz", "12 KHz", "14 KHz", "16 KHz"]
+    readonly property var shortLabels: ["60", "170", "310", "600", "1K", "3K", "6K", "12K", "14K", "16K"]
+    // column width: 60 px when there is room (settings), narrower in the 400 px popup
+    readonly property real columnWidth: Math.min(Theme.dp(60), width / 11)
+    readonly property bool compact: columnWidth < Theme.dp(54)
     property int sliderHeight: Theme.dp(320)
 
     signal preampEdited(real value)
@@ -38,7 +42,7 @@ Item {
     Row {
         id: row
         anchors.horizontalCenter: parent.horizontalCenter
-        spacing: Math.max(Theme.dp(4), (root.width - 11 * Theme.dp(60)) / 10)
+        spacing: Math.max(0, (root.width - 11 * root.columnWidth) / 10)
 
         Repeater {
             model: 11
@@ -48,7 +52,7 @@ Item {
                 readonly property bool isPreamp: index === 0
                 readonly property real value: isPreamp ? root.preamp : Number(root.bands[index - 1] || 0)
                 spacing: Theme.dp(8)
-                width: Theme.dp(60)
+                width: root.columnWidth
 
                 T.Slider {
                     id: slider
@@ -99,19 +103,21 @@ Item {
 
                 RText {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: band.isPreamp ? qsTr("Preamp") : root.labels[band.index - 1]
+                    text: band.isPreamp ? (root.compact ? qsTr("Pre") : qsTr("Preamp"))
+                                        : (root.compact ? root.shortLabels[band.index - 1] : root.labels[band.index - 1])
+                    font.pixelSize: root.compact ? Theme.fontSizeSmall : Theme.fontSize
                     color: Theme.textDim
                 }
 
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    width: Theme.dp(60)
+                    width: root.columnWidth - Theme.dp(2)
                     height: Theme.dp(30)
                     radius: Theme.radiusSmall
                     color: Theme.p.bgB1Transparent
                     RText {
                         anchors.centerIn: parent
-                        text: band.value.toFixed(1) + " dB"
+                        text: band.value.toFixed(1) + (root.compact ? "" : " dB")
                         font.pixelSize: Theme.fontSizeSmall
                         color: Theme.textItem
                     }

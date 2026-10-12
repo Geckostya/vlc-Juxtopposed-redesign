@@ -103,6 +103,7 @@ Item {
         target: RWindows
         function onSettingsRequested(category) { root.openSettings(category) }
         function onShortcutsRequested() { root.openShortcuts() }
+        function onEffectsRequested(tab) { playerView.openEffects(tab) }
         function onNetworkStreamRequested() { networkLoader.active = true; networkLoader.item.open() }
         function onNewPlaylistRequested() { newPlaylistLoader.active = true; newPlaylistLoader.item.open() }
         function onAddSubtitlesRequested(url) { addSubtitlesLoader.active = true; addSubtitlesLoader.item.openFor(url) }

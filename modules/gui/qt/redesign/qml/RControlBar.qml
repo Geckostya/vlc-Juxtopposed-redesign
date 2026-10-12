@@ -56,7 +56,7 @@ Rectangle {
                 iconName: "previous"
                 toolTip: qsTr("Previous")
                 enabled: MainPlaylistController.hasPrev || Player.isStarted
-                onClicked: MainPlaylistController.prevOrReset()
+                onClicked: MainPlaylistController.prev()
             }
 
             T.AbstractButton {

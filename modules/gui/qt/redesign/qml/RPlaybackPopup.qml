@@ -133,7 +133,7 @@ Rectangle {
                 anchors.fill: parent
                 anchors.margins: Theme.margin
                 text: qsTr("Effects and Filters")
-                onClicked: { root.closeRequested(); DialogsProvider.extendedDialog() }
+                onClicked: { root.closeRequested(); RWindows.effectsRequested(0) }
             }
         }
     }

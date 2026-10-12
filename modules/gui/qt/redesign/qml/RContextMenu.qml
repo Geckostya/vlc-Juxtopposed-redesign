@@ -62,7 +62,7 @@ RMenu {
 
     RMenuSeparator { }
 
-    RAction { iconName: "settings_2t"; text: qsTr("More Settings"); onTriggered: DialogsProvider.extendedDialog() }
+    RAction { iconName: "settings_2t"; text: qsTr("More Settings"); onTriggered: DialogsProvider.prefsDialog() }
     RAction { iconName: "playlist_2t"; text: qsTr("Queue");         onTriggered: root.panelRequested("queue", 0) }
     RAction { iconName: "file_2t";     text: qsTr("Open Media");    shortcutText: "Ctrl + O"; onTriggered: DialogsProvider.simpleOpenDialog() }
     RAction { iconName: "quit_2t";     text: qsTr("Quit VLC");      shortcutText: "Ctrl + Q"; onTriggered: DialogsProvider.quit() }

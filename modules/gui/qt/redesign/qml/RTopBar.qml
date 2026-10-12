@@ -52,6 +52,25 @@ Rectangle {
         sourceComponent: Widgets.CSDTitlebarTapNDrapHandler { }
     }
 
+    // In fullscreen the menu sits in the screen corner: the whole corner, from the
+    // screen edges to the "..." button and including the cone, opens the menu
+    // (aiming at a 30 px button near the edge is hard, throwing the mouse into
+    // the corner is easy).
+    T.AbstractButton {
+        id: cornerHit
+        visible: root.fullscreen
+        z: 1
+        x: 0
+        y: 0
+        width: menuBtn.mapToItem(root, menuBtn.width, 0).x + Theme.dp(4)
+        height: root.height
+        hoverEnabled: true
+        onClicked: root.menuRequested()
+        Accessible.name: qsTr("Menu")
+        background: Item { }
+    }
+    Binding { target: menuBtn; property: "forceHovered"; value: cornerHit.hovered; when: cornerHit.visible }
+
     Item {
         anchors.fill: parent
         anchors.margins: Theme.dp(6)
