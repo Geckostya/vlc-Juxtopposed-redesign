@@ -75,6 +75,13 @@ public:
     /// they return an empty string when cancelled
     Q_INVOKABLE QString browseFile(const QString &current, bool forSaving = false) const;
     Q_INVOKABLE QString browseDirectory(const QString &current) const;
+    /// several files, as URLs ("file:///...")
+    Q_INVOKABLE QStringList browseFiles(const QString &title) const;
+    /// files of a directory (by URL or path) whose extension is in extensions,
+    /// sorted by name: [{ url, name }]
+    Q_INVOKABLE QVariantList listFiles(const QString &directory, const QStringList &extensions) const;
+    /// directory of a media URL, as a URL
+    Q_INVOKABLE QString directoryOf(const QString &url) const;
     Q_INVOKABLE QString pickColor(const QString &current) const;
     Q_INVOKABLE QString pickFont(const QString &current) const;
 

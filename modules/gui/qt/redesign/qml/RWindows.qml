@@ -24,4 +24,8 @@ import QtQuick
 QtObject {
     signal settingsRequested(string category)
     signal shortcutsRequested()
+    signal networkStreamRequested()
+    signal newPlaylistRequested()
+    // url: a media of the folder to pair with subtitles ("" = ask for the folder)
+    signal addSubtitlesRequested(string url)
 }

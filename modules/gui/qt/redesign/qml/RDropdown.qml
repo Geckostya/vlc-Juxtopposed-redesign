@@ -85,9 +85,19 @@ T.ComboBox {
             color: entry.highlighted || entry.hovered ? Theme.p.bgA1 : "transparent"
         }
         contentItem: Item {
+            // optional icon of the entry (equalizer presets)
+            RIcon {
+                id: entryIcon
+                x: Theme.dp(14)
+                anchors.verticalCenter: parent.verticalCenter
+                visible: typeof entry.modelData === "object" && !!entry.modelData.icon
+                name: visible ? entry.modelData.icon : ""
+                size: Theme.iconSizeSmall
+                color: Theme.textItem
+            }
             RText {
-                anchors.left: parent.left
-                anchors.leftMargin: Theme.dp(16)
+                anchors.left: entryIcon.visible ? entryIcon.right : parent.left
+                anchors.leftMargin: entryIcon.visible ? Theme.dp(10) : Theme.dp(16)
                 anchors.right: check.left
                 anchors.rightMargin: Theme.dp(8)
                 anchors.verticalCenter: parent.verticalCenter

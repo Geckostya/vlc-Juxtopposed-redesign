@@ -49,6 +49,13 @@ FocusScope {
         hideTimer.restart()
     }
 
+    // tab: 0 video, 1 audio
+    function openEffects(tab) {
+        openPanel = tab === 1 ? "audio" : "video"
+        tracksPopup.currentIndex = tab
+        tracksPopup.effects = true
+    }
+
     function togglePanel(name, tab) {
         if (openPanel === name) {
             openPanel = ""

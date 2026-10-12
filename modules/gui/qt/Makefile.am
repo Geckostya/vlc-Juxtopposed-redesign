@@ -317,6 +317,8 @@ libqt_plugin_la_SOURCES = \
 	redesign/redesign_icon_provider.hpp \
 	redesign/redesign_settings.cpp \
 	redesign/redesign_settings.hpp \
+	redesign/redesign_effects.cpp \
+	redesign/redesign_effects.hpp \
 	util/vlcaccess_image_provider.cpp util/vlcaccess_image_provider.hpp \
 	util/covergenerator.cpp \
 	util/covergenerator.hpp \
@@ -509,6 +511,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	util/base_model.moc.cpp \
 	util/color_scheme_model.moc.cpp \
 	redesign/redesign_settings.moc.cpp \
+	redesign/redesign_effects.moc.cpp \
 	util/ui_notifier.moc.cpp \
 	util/color_svg_image_provider.moc.cpp \
 	util/vlcaccess_image_provider.moc.cpp \
@@ -1524,16 +1527,24 @@ libqml_module_redesign_a_CPPFLAGS = $(libqt_plugin_la_CPPFLAGS)
 libqml_module_redesign_a_QML = \
 	redesign/qml/RAccentPicker.qml \
 	redesign/qml/RAction.qml \
+	redesign/qml/RAddSubtitlesDialog.qml \
 	redesign/qml/RAdvancedOptions.qml \
+	redesign/qml/RAudioEffects.qml \
 	redesign/qml/RButton.qml \
 	redesign/qml/RCheckItem.qml \
 	redesign/qml/RChip.qml \
 	redesign/qml/RClearHistoryButton.qml \
+	redesign/qml/RCollapsible.qml \
 	redesign/qml/RColorField.qml \
 	redesign/qml/RContextMenu.qml \
 	redesign/qml/RControlBar.qml \
+	redesign/qml/RCropEditor.qml \
+	redesign/qml/RDashedLine.qml \
+	redesign/qml/RDialogWindow.qml \
 	redesign/qml/RDropdown.qml \
+	redesign/qml/REffectSlider.qml \
 	redesign/qml/REqualizerBands.qml \
+	redesign/qml/RFilterSwitch.qml \
 	redesign/qml/RIcon.qml \
 	redesign/qml/RIconButton.qml \
 	redesign/qml/RIdleView.qml \
@@ -1544,10 +1555,13 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RMenuItem.qml \
 	redesign/qml/RMenuSeparator.qml \
 	redesign/qml/RModuleSwitch.qml \
+	redesign/qml/RNetworkStreamDialog.qml \
+	redesign/qml/RNewPlaylistDialog.qml \
 	redesign/qml/ROption.qml \
 	redesign/qml/RPanelButton.qml \
 	redesign/qml/RPlaybackPopup.qml \
 	redesign/qml/RPlayerView.qml \
+	redesign/qml/RPlaylistSaver.qml \
 	redesign/qml/RQueueItem.qml \
 	redesign/qml/RQueuePanel.qml \
 	redesign/qml/RScrollBar.qml \
@@ -1585,6 +1599,7 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RTrackPage.qml \
 	redesign/qml/RTracksPopup.qml \
 	redesign/qml/RValueSlider.qml \
+	redesign/qml/RVideoEffects.qml \
 	redesign/qml/RVolumeCone.qml \
 	redesign/qml/RWindowButton.qml
 libqml_module_redesign_a_Singleton_QML = \

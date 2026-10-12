@@ -25,6 +25,8 @@
 #include <QColorDialog>
 #include <QDir>
 #include <QFileDialog>
+#include <QFileInfo>
+#include <QUrl>
 #include <QFontDialog>
 #include <QHash>
 #include <QKeyEvent>
@@ -460,6 +462,40 @@ QString RedesignSettings::browseDirectory(const QString &current) const
 {
     return QDir::toNativeSeparators(
         QFileDialog::getExistingDirectory(nullptr, qtr("Select directory"), current));
+}
+
+QStringList RedesignSettings::browseFiles(const QString &title) const
+{
+    QStringList urls;
+    for (const QUrl &u : QFileDialog::getOpenFileUrls(nullptr, title))
+        urls.append(u.toString(QUrl::FullyEncoded));
+    return urls;
+}
+
+QVariantList RedesignSettings::listFiles(const QString &directory, const QStringList &extensions) const
+{
+    const QUrl url(directory);
+    const QString path = url.isLocalFile() ? url.toLocalFile() : directory;
+    QStringList patterns;
+    for (const QString &e : extensions)
+        patterns.append(QStringLiteral("*.") + e);
+
+    QVariantList list;
+    QDir dir(path);
+    const QFileInfoList files = dir.entryInfoList(patterns, QDir::Files | QDir::Readable,
+                                                  QDir::Name | QDir::IgnoreCase);
+    for (const QFileInfo &f : files)
+        list.append(QVariantMap{ { "url", QUrl::fromLocalFile(f.absoluteFilePath()).toString(QUrl::FullyEncoded) },
+                                 { "name", f.fileName() } });
+    return list;
+}
+
+QString RedesignSettings::directoryOf(const QString &url) const
+{
+    const QUrl u(url);
+    if (!u.isLocalFile())
+        return {};
+    return QUrl::fromLocalFile(QFileInfo(u.toLocalFile()).absolutePath()).toString(QUrl::FullyEncoded);
 }
 
 QString RedesignSettings::pickColor(const QString &current) const

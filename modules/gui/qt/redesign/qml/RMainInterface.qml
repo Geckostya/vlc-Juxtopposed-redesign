@@ -85,12 +85,27 @@ Item {
             Qt.callLater(root.openSettings, open.split(":")[1] || "")
         else if (open === "shortcuts")
             Qt.callLater(root.openShortcuts)
+        else if (open === "network")
+            Qt.callLater(RWindows.networkStreamRequested)
+        else if (open === "playlist")
+            Qt.callLater(RWindows.newPlaylistRequested)
+        else if (open.startsWith("subtitles"))
+            Qt.callLater(RWindows.addSubtitlesRequested, open.substring(10))
+        else if (open.startsWith("effects"))
+            Qt.callLater(playerView.openEffects, open === "effects:audio" ? 1 : 0)
     }
+
+    Loader { id: networkLoader; active: false; sourceComponent: RNetworkStreamDialog { transientParent: root.Window.window } }
+    Loader { id: newPlaylistLoader; active: false; sourceComponent: RNewPlaylistDialog { transientParent: root.Window.window } }
+    Loader { id: addSubtitlesLoader; active: false; sourceComponent: RAddSubtitlesDialog { transientParent: root.Window.window } }
 
     Connections {
         target: RWindows
         function onSettingsRequested(category) { root.openSettings(category) }
         function onShortcutsRequested() { root.openShortcuts() }
+        function onNetworkStreamRequested() { networkLoader.active = true; networkLoader.item.open() }
+        function onNewPlaylistRequested() { newPlaylistLoader.active = true; newPlaylistLoader.item.open() }
+        function onAddSubtitlesRequested(url) { addSubtitlesLoader.active = true; addSubtitlesLoader.item.openFor(url) }
     }
 
     // keep VLCStyle informed, some C++ helpers (tooltips, popups) rely on it
@@ -150,6 +165,7 @@ Item {
     }
 
     RPlayerView {
+        id: playerView
         anchors.fill: parent
         focus: true
     }

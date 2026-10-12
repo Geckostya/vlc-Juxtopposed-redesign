@@ -31,10 +31,15 @@ Rectangle {
     // 0: video, 1: audio, 2: subtitles
     property alias currentIndex: tabs.currentIndex
 
+    // effects of the current tab instead of its tracks
+    property bool effects: false
+
     signal closeRequested()
 
+    onVisibleChanged: if (!visible) effects = false
+
     implicitWidth: Theme.popupWidth
-    implicitHeight: Theme.dp(524)
+    implicitHeight: effects ? Theme.dp(640) : Theme.dp(524)
     radius: Theme.radiusLarge
     color: Theme.panelBackground
     clip: true
@@ -59,7 +64,7 @@ Rectangle {
         StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: tabs.currentIndex
+            currentIndex: root.effects && tabs.currentIndex < 2 ? 3 + tabs.currentIndex : tabs.currentIndex
 
             // --- Video ------------------------------------------------------
             ColumnLayout {
@@ -110,12 +115,30 @@ Rectangle {
                         toolTip: qsTr("Add subtitle file")
                         onClicked: DialogsProvider.loadSubtitlesFile()
                     }
+                    RIconButton {
+                        iconName: "folder"
+                        toolTip: qsTr("Add subtitles to the whole folder")
+                        onClicked: {
+                            root.closeRequested()
+                            RWindows.addSubtitlesRequested(Player.isStarted ? String(Player.url) : "")
+                        }
+                    }
                 }
                 RTrackPage {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     trackModel: Player.subtitleTracks
                 }
+            }
+
+            // --- Effects (3: video, 4: audio), created when first shown -----
+            Loader {
+                active: root.effects && tabs.currentIndex === 0
+                sourceComponent: RVideoEffects { }
+            }
+            Loader {
+                active: root.effects && tabs.currentIndex === 1
+                sourceComponent: RAudioEffects { }
             }
         }
 
@@ -130,15 +153,23 @@ Rectangle {
                 anchors.margins: Theme.margin
                 hoverEnabled: true
                 onClicked: {
-                    root.closeRequested()
-                    DialogsProvider.extendedDialog()
+                    if (tabs.currentIndex === 2) {
+                        // subtitle look and timing live in the settings
+                        root.closeRequested()
+                        RWindows.settingsRequested("subtitles")
+                    } else {
+                        root.effects = !root.effects
+                    }
                 }
                 background: Rectangle {
                     radius: Theme.radiusSmall
                     color: prefsBtn.hovered ? Theme.p.bgA1 : Theme.trackBackground
                 }
                 contentItem: RText {
-                    text: qsTr("Show Preferences")
+                    text: root.effects ? qsTr("Back to tracks")
+                        : tabs.currentIndex === 0 ? qsTr("Video effects")
+                        : tabs.currentIndex === 1 ? qsTr("Audio effects and equalizer")
+                        : qsTr("Subtitle appearance")
                     color: Theme.textDim
                     horizontalAlignment: Text.AlignHCenter
                 }
