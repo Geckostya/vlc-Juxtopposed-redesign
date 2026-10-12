@@ -313,6 +313,8 @@ libqt_plugin_la_SOURCES = \
 	util/color_scheme_model.cpp util/color_scheme_model.hpp \
 	util/ui_notifier.cpp util/ui_notifier.hpp \
 	util/color_svg_image_provider.cpp util/color_svg_image_provider.hpp \
+	redesign/redesign_icon_provider.cpp \
+	redesign/redesign_icon_provider.hpp \
 	util/vlcaccess_image_provider.cpp util/vlcaccess_image_provider.hpp \
 	util/covergenerator.cpp \
 	util/covergenerator.hpp \
@@ -995,6 +997,222 @@ libqt_plugin_la_RES = \
 	pixmaps/sd/stream.svg \
 	pixmaps/sd/unknown.svg
 
+libqt_plugin_la_RES += \
+	redesign/icons/EQ.svg \
+	redesign/icons/EQ_classical.svg \
+	redesign/icons/EQ_club.svg \
+	redesign/icons/EQ_dance.svg \
+	redesign/icons/EQ_full-bass-and-treble.svg \
+	redesign/icons/EQ_full-bass.svg \
+	redesign/icons/EQ_full-treble.svg \
+	redesign/icons/EQ_headphones.svg \
+	redesign/icons/EQ_large-hall.svg \
+	redesign/icons/EQ_live.svg \
+	redesign/icons/EQ_party.svg \
+	redesign/icons/EQ_pop.svg \
+	redesign/icons/EQ_reggae.svg \
+	redesign/icons/EQ_rock.svg \
+	redesign/icons/EQ_ska.svg \
+	redesign/icons/EQ_soft-rock.svg \
+	redesign/icons/EQ_soft.svg \
+	redesign/icons/EQ_techno.svg \
+	redesign/icons/HDR.svg \
+	redesign/icons/PiP.svg \
+	redesign/icons/accessibility.svg \
+	redesign/icons/add.svg \
+	redesign/icons/album.svg \
+	redesign/icons/arrow_down.svg \
+	redesign/icons/arrow_down_2t.svg \
+	redesign/icons/arrow_left.svg \
+	redesign/icons/arrow_left_2t.svg \
+	redesign/icons/arrow_right.svg \
+	redesign/icons/arrow_right_2t.svg \
+	redesign/icons/arrow_up.svg \
+	redesign/icons/arrow_up_2t.svg \
+	redesign/icons/artist.svg \
+	redesign/icons/artist_active.svg \
+	redesign/icons/audio.svg \
+	redesign/icons/audio_2t.svg \
+	redesign/icons/audio_active.svg \
+	redesign/icons/backward-10-sec.svg \
+	redesign/icons/backward-15-sec.svg \
+	redesign/icons/bookmark.svg \
+	redesign/icons/bookmarks.svg \
+	redesign/icons/bookmarks_2t.svg \
+	redesign/icons/capture-device.svg \
+	redesign/icons/capture-device_2t.svg \
+	redesign/icons/chapters.svg \
+	redesign/icons/chapters_2t.svg \
+	redesign/icons/check.svg \
+	redesign/icons/check_selected.svg \
+	redesign/icons/check_selected_2t.svg \
+	redesign/icons/chevron_down.svg \
+	redesign/icons/chevron_left.svg \
+	redesign/icons/chevron_right.svg \
+	redesign/icons/chevron_up.svg \
+	redesign/icons/close.svg \
+	redesign/icons/collapse-sidebar.svg \
+	redesign/icons/disc.svg \
+	redesign/icons/disc_2t.svg \
+	redesign/icons/divider.svg \
+	redesign/icons/edit.svg \
+	redesign/icons/expand-sidebar.svg \
+	redesign/icons/favorite.svg \
+	redesign/icons/favorite_2t.svg \
+	redesign/icons/favorite_active.svg \
+	redesign/icons/file.svg \
+	redesign/icons/file_2t.svg \
+	redesign/icons/folder.svg \
+	redesign/icons/folder_2t.svg \
+	redesign/icons/folder_active.svg \
+	redesign/icons/folder_selected.svg \
+	redesign/icons/forward-10-sec.svg \
+	redesign/icons/forward-15-sec.svg \
+	redesign/icons/fullscreen.svg \
+	redesign/icons/fullscreen_active.svg \
+	redesign/icons/genre.svg \
+	redesign/icons/genre_2t.svg \
+	redesign/icons/grid.svg \
+	redesign/icons/home.svg \
+	redesign/icons/home_active.svg \
+	redesign/icons/home_selected.svg \
+	redesign/icons/hotkeys.svg \
+	redesign/icons/hotkeys_2t.svg \
+	redesign/icons/hotkeys_active.svg \
+	redesign/icons/info.svg \
+	redesign/icons/info_2t.svg \
+	redesign/icons/interface.svg \
+	redesign/icons/interface_active.svg \
+	redesign/icons/link.svg \
+	redesign/icons/link_2t.svg \
+	redesign/icons/link_active.svg \
+	redesign/icons/list.svg \
+	redesign/icons/lists.svg \
+	redesign/icons/lists_active.svg \
+	redesign/icons/logo.svg \
+	redesign/icons/maximize.svg \
+	redesign/icons/media.svg \
+	redesign/icons/minimize.svg \
+	redesign/icons/more.svg \
+	redesign/icons/move.svg \
+	redesign/icons/music.svg \
+	redesign/icons/new-folder.svg \
+	redesign/icons/new-folder_2t.svg \
+	redesign/icons/next.svg \
+	redesign/icons/next_2t.svg \
+	redesign/icons/open.svg \
+	redesign/icons/paint.svg \
+	redesign/icons/paint_2t.svg \
+	redesign/icons/paint_active.svg \
+	redesign/icons/pause.svg \
+	redesign/icons/play.svg \
+	redesign/icons/playback-settings.svg \
+	redesign/icons/playback-settings_active.svg \
+	redesign/icons/playback.svg \
+	redesign/icons/playback_2t.svg \
+	redesign/icons/playback_active.svg \
+	redesign/icons/playback_selected_2t.svg \
+	redesign/icons/playing.svg \
+	redesign/icons/playlist.svg \
+	redesign/icons/playlist_2t.svg \
+	redesign/icons/playlist_active.svg \
+	redesign/icons/plugins.svg \
+	redesign/icons/plugins_2t.svg \
+	redesign/icons/plugins_active.svg \
+	redesign/icons/preferences.svg \
+	redesign/icons/preferences_active.svg \
+	redesign/icons/previous.svg \
+	redesign/icons/previous_2t.svg \
+	redesign/icons/privacy.svg \
+	redesign/icons/privacy_2t.svg \
+	redesign/icons/privacy_active.svg \
+	redesign/icons/profile.svg \
+	redesign/icons/profile_2t.svg \
+	redesign/icons/queue.svg \
+	redesign/icons/queue_2t.svg \
+	redesign/icons/quit.svg \
+	redesign/icons/quit_2t.svg \
+	redesign/icons/recent.svg \
+	redesign/icons/recent_2t.svg \
+	redesign/icons/record.svg \
+	redesign/icons/record_2t.svg \
+	redesign/icons/record_active.svg \
+	redesign/icons/refresh.svg \
+	redesign/icons/refresh_2t.svg \
+	redesign/icons/remove.svg \
+	redesign/icons/repeat.svg \
+	redesign/icons/repeat_one.svg \
+	redesign/icons/repeat_right_2t.svg \
+	redesign/icons/replay.svg \
+	redesign/icons/save.svg \
+	redesign/icons/save_2t.svg \
+	redesign/icons/scope_2t.svg \
+	redesign/icons/search.svg \
+	redesign/icons/settings.svg \
+	redesign/icons/settings_2t.svg \
+	redesign/icons/settings_active.svg \
+	redesign/icons/shuffle.svg \
+	redesign/icons/shuffle_right_2t.svg \
+	redesign/icons/sidebar_active.svg \
+	redesign/icons/sidebar_left.svg \
+	redesign/icons/sidebar_right.svg \
+	redesign/icons/snapshot.svg \
+	redesign/icons/songs.svg \
+	redesign/icons/songs_active.svg \
+	redesign/icons/songs_selected.svg \
+	redesign/icons/sort.svg \
+	redesign/icons/sort_active.svg \
+	redesign/icons/spectometer_2t.svg \
+	redesign/icons/spectrum_2t.svg \
+	redesign/icons/speed.svg \
+	redesign/icons/speed_active.svg \
+	redesign/icons/stop.svg \
+	redesign/icons/stop_2t.svg \
+	redesign/icons/streaming.svg \
+	redesign/icons/streaming_2t.svg \
+	redesign/icons/streaming_active.svg \
+	redesign/icons/streaming_selected.svg \
+	redesign/icons/subtitle.svg \
+	redesign/icons/subtitles.svg \
+	redesign/icons/subtitles_2t.svg \
+	redesign/icons/subtitles_active.svg \
+	redesign/icons/swap.svg \
+	redesign/icons/swap_2t.svg \
+	redesign/icons/tab_audio.svg \
+	redesign/icons/tab_subtitles.svg \
+	redesign/icons/tab_video.svg \
+	redesign/icons/thumbnail.svg \
+	redesign/icons/thumbnail_high.svg \
+	redesign/icons/thumbnail_low.svg \
+	redesign/icons/thumbnail_medium.svg \
+	redesign/icons/trash.svg \
+	redesign/icons/tv.svg \
+	redesign/icons/tv_active.svg \
+	redesign/icons/tv_selected.svg \
+	redesign/icons/ui.svg \
+	redesign/icons/ui_2t.svg \
+	redesign/icons/upload_up_2t.svg \
+	redesign/icons/video.svg \
+	redesign/icons/video_2t.svg \
+	redesign/icons/video_active.svg \
+	redesign/icons/videos.svg \
+	redesign/icons/videos_active.svg \
+	redesign/icons/videos_selected.svg \
+	redesign/icons/view.svg \
+	redesign/icons/view_active.svg \
+	redesign/icons/vlc.svg \
+	redesign/icons/vol_cone_bg.svg \
+	redesign/icons/vol_cone_fill.svg \
+	redesign/icons/volume_high.svg \
+	redesign/icons/volume_low.svg \
+	redesign/icons/volume_medium.svg \
+	redesign/icons/volume_mute.svg \
+	redesign/icons/waveform_2t.svg \
+	redesign/icons/window.svg \
+	redesign/icons/window_2t.svg \
+	redesign/icons/wrench.svg \
+	redesign/icons/zoom.svg
+
 if HAVE_WIN32
 libqt_plugin_la_RES += \
 	pixmaps/win7/pause.svg \
@@ -1296,6 +1514,48 @@ libqml_module_util_a_SOURCES = $(QML_MODULE_util_SRC)
 nodist_libqml_module_util_a_SOURCES = util/qmlassets.cpp $(QML_MODULE_util_NODIST_EXTRA)
 QML_MODULE_LIBS += libqml_module_util.a
 
+libqml_module_redesign_a_Module = VLC.Redesign
+libqml_module_redesign_a_ModulePath = VLC/Redesign
+libqml_module_redesign_a_CXXFLAGS = $(libqt_plugin_la_CXXFLAGS)
+libqml_module_redesign_a_CPPFLAGS = $(libqt_plugin_la_CPPFLAGS)
+libqml_module_redesign_a_QML = \
+	redesign/qml/RAction.qml \
+	redesign/qml/RCheckItem.qml \
+	redesign/qml/RChip.qml \
+	redesign/qml/RContextMenu.qml \
+	redesign/qml/RControlBar.qml \
+	redesign/qml/RIcon.qml \
+	redesign/qml/RIconButton.qml \
+	redesign/qml/RIdleView.qml \
+	redesign/qml/RMainInterface.qml \
+	redesign/qml/RMainMenu.qml \
+	redesign/qml/RMenu.qml \
+	redesign/qml/RMenuItem.qml \
+	redesign/qml/RMenuSeparator.qml \
+	redesign/qml/RPanelButton.qml \
+	redesign/qml/RPlaybackPopup.qml \
+	redesign/qml/RPlayerView.qml \
+	redesign/qml/RQueueItem.qml \
+	redesign/qml/RQueuePanel.qml \
+	redesign/qml/RSectionHeader.qml \
+	redesign/qml/RSeekBar.qml \
+	redesign/qml/RTabBar.qml \
+	redesign/qml/RText.qml \
+	redesign/qml/RTimeLabel.qml \
+	redesign/qml/RToolTip.qml \
+	redesign/qml/RTopBar.qml \
+	redesign/qml/RTrackList.qml \
+	redesign/qml/RTrackPage.qml \
+	redesign/qml/RTracksPopup.qml \
+	redesign/qml/RValueSlider.qml \
+	redesign/qml/RVolumeCone.qml \
+	redesign/qml/RWindowButton.qml
+libqml_module_redesign_a_Singleton_QML = \
+	redesign/qml/Theme.qml
+libqml_module_redesign_a_SOURCES = $(QML_MODULE_redesign_SRC)
+nodist_libqml_module_redesign_a_SOURCES = redesign/qmlassets.cpp $(QML_MODULE_redesign_NODIST_EXTRA)
+QML_MODULE_LIBS += libqml_module_redesign.a
+
 libqml_module_widgets_a_Module = VLC.Widgets
 libqml_module_widgets_a_ModulePath = VLC/Widgets
 libqml_module_widgets_a_CXXFLAGS = $(libqt_plugin_la_CXXFLAGS)
@@ -1416,6 +1676,8 @@ QML_MODULE_playercontrols_SRC = $(libqml_module_playercontrols_a_QML) $(libqml_m
 QML_MODULE_playercontrols_NODIST_EXTRA = playercontrols/qmlcache_loader.cpp
 QML_MODULE_playlist_SRC = $(libqml_module_playlist_a_QML) $(libqml_module_playlist_a_Singleton_QML)
 QML_MODULE_playlist_NODIST_EXTRA = playlist/qmlcache_loader.cpp
+QML_MODULE_redesign_SRC = $(libqml_module_redesign_a_QML) $(libqml_module_redesign_a_Singleton_QML)
+QML_MODULE_redesign_NODIST_EXTRA = redesign/qmlcache_loader.cpp
 QML_MODULE_style_SRC = $(libqml_module_style_a_QML) $(libqml_module_style_a_Singleton_QML)
 QML_MODULE_style_NODIST_EXTRA = style/qmlcache_loader.cpp
 QML_MODULE_util_SRC = $(libqml_module_util_a_QML) $(libqml_module_util_a_Singleton_QML)
@@ -1434,6 +1696,7 @@ libqt_plugin_la_QML_MODULES = \
 	player \
 	playercontrols \
 	playlist \
+	redesign \
 	style \
 	util \
 	widgets
@@ -1448,6 +1711,8 @@ libqt_plugin_la_ALL_QML = \
 	$(libqml_module_player_a_Singleton_QML) \
 	$(libqml_module_playercontrols_a_QML) \
 	$(libqml_module_playlist_a_QML) \
+	$(libqml_module_redesign_a_QML) \
+	$(libqml_module_redesign_a_Singleton_QML) \
 	$(libqml_module_style_a_QML) \
 	$(libqml_module_style_a_Singleton_QML) \
 	$(libqml_module_util_a_QML) \

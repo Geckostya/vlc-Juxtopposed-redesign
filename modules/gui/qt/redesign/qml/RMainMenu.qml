@@ -1,0 +1,41 @@
+/*****************************************************************************
+ * Copyright (C) 2026 VLC authors and VideoLAN
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * ( at your option ) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
+ *****************************************************************************/
+import QtQuick
+
+import VLC.MainInterface
+import VLC.Dialogs
+
+// The "..." menu of the top bar. Replaces the classic menubar: media
+// related actions first, then app level settings.
+RMenu {
+    id: root
+
+    RAction { iconName: "file_2t";     text: qsTr("Open File(s)");          shortcutText: "Ctrl + O"; onTriggered: DialogsProvider.simpleOpenDialog() }
+    RAction { iconName: "folder_2t";   text: qsTr("Open Folder");           shortcutText: "Ctrl + F"; onTriggered: DialogsProvider.PLOpenDir() }
+    RAction { iconName: "streaming_2t";  text: qsTr("Open Network Stream");   shortcutText: "Ctrl + N"; onTriggered: DialogsProvider.openNetDialog() }
+    RAction { iconName: "disc_2t";     text: qsTr("Open Disc");             shortcutText: "Ctrl + D"; onTriggered: DialogsProvider.openDiscDialog() }
+    RAction { iconName: "capture-device_2t";  text: qsTr("Open Capture Device");   shortcutText: "Ctrl + C"; onTriggered: DialogsProvider.openCaptureDialog() }
+    RAction { iconName: "swap_2t";  text: qsTr("Convert");               shortcutText: "Ctrl + R"; onTriggered: DialogsProvider.openAndTranscodingDialogs() }
+
+    RMenuSeparator { }
+
+    RAction { iconName: "hotkeys_2t";  text: qsTr("Keyboard Shortcuts");    onTriggered: DialogsProvider.prefsDialog() }
+    RAction { iconName: "paint_2t";    text: qsTr("Customize Player");      onTriggered: DialogsProvider.showToolbarEditorDialog() }
+    RAction { iconName: "settings_2t"; text: qsTr("Settings");              shortcutText: "Ctrl + P"; onTriggered: DialogsProvider.prefsDialog() }
+    RAction { iconName: "info_2t";     text: qsTr("About VLC");             shortcutText: "Shift + F1"; onTriggered: DialogsProvider.aboutDialog() }
+}

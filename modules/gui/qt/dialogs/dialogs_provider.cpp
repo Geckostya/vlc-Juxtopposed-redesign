@@ -207,6 +207,13 @@ void DialogsProvider::customEvent( QEvent *event )
         {
            popupMenu.reset();
            bool show = (de->i_arg != 0);
+           if( var_InheritBool( p_intf, "qt-redesign" ) )
+           {
+              if( show )
+                 emit releaseMouseEvents();
+              emit contextMenuRequested( show );
+              break;
+           }
            if( show )
            {
               //popping a QMenu prevents mouse release events to be received,

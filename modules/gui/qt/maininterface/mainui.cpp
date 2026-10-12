@@ -46,6 +46,7 @@
 #include "util/flickable_scroll_handler.hpp"
 #include "util/kirigamiwheelhandler.hpp"
 #include "util/color_svg_image_provider.hpp"
+#include "redesign/redesign_icon_provider.hpp"
 #include "util/effects_image_provider.hpp"
 #include "util/vlcaccess_image_provider.hpp"
 #include "util/csdbuttonmodel.hpp"
@@ -163,8 +164,12 @@ bool MainUI::setup(QQmlEngine* engine)
         new EffectsImageProvider(engine);
     engine->addImageProvider(QStringLiteral("svgcolor"), new SVGColorImageImageProvider());
     engine->addImageProvider(QStringLiteral("vlcaccess"), new VLCAccessImageProvider());
+    engine->addImageProvider(QStringLiteral("redesignicon"), new RedesignIconProvider());
 
-    m_component  = new QQmlComponent(engine, QStringLiteral("qrc:/qt/qml/VLC/MainInterface/MainInterface.qml"), QQmlComponent::PreferSynchronous, engine);
+    const QString rootUrl = var_InheritBool(m_intf, "qt-redesign")
+            ? QStringLiteral("qrc:/qt/qml/VLC/Redesign/RMainInterface.qml")
+            : QStringLiteral("qrc:/qt/qml/VLC/MainInterface/MainInterface.qml");
+    m_component  = new QQmlComponent(engine, rootUrl, QQmlComponent::PreferSynchronous, engine);
     if (m_component->isLoading())
     {
         msg_Warn(m_intf, "component is still loading");

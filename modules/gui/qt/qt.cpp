@@ -261,6 +261,10 @@ static void ShowDialog   ( intf_thread_t *, int, int, intf_dialog_args_t * );
 #define QT_MENUBAR_TEXT N_( "Show the menu bar" )
 #define QT_MENUBAR_LONGTEXT N_( "This option displays the classic menu bar" )
 
+#define QT_REDESIGN_TEXT N_("Use the redesigned interface")
+#define QT_REDESIGN_LONGTEXT N_("Use the new player centric interface. " \
+    "Disable it to get back the classic interface.")
+
 #define QT_PIN_CONTROLS_TEXT N_("Pin video controls")
 #define QT_PIN_CONTROLS_LONGTEXT N_("Place video controls above and below the video instead of above")
 
@@ -354,6 +358,8 @@ vlc_module_begin ()
     set_callbacks( OpenIntf, Close )
 
     add_shortcut("qt")
+
+    add_bool( "qt-redesign", true, QT_REDESIGN_TEXT, QT_REDESIGN_LONGTEXT )
 
     add_bool( "qt-minimal-view", false, QT_MINIMAL_MODE_TEXT,
               nullptr )
@@ -842,6 +848,7 @@ static void *Thread( void *obj )
     Q_INIT_RESOURCE( player_assets );
     Q_INIT_RESOURCE( playercontrols_assets );
     Q_INIT_RESOURCE( playlist_assets );
+    Q_INIT_RESOURCE( redesign_assets );
     Q_INIT_RESOURCE( style_assets );
     Q_INIT_RESOURCE( util_assets );
     Q_INIT_RESOURCE( widgets_assets );
@@ -856,6 +863,7 @@ static void *Thread( void *obj )
     Q_INIT_RESOURCE( player_cachegen );
     Q_INIT_RESOURCE( playercontrols_cachegen );
     Q_INIT_RESOURCE( playlist_cachegen );
+    Q_INIT_RESOURCE( redesign_cachegen );
     Q_INIT_RESOURCE( style_cachegen );
     Q_INIT_RESOURCE( util_cachegen );
     Q_INIT_RESOURCE( widgets_cachegen );

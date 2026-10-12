@@ -287,6 +287,9 @@ public:
 
 signals:
     void releaseMouseEvents();
+    /// emitted instead of showing the classic QMenu when the redesigned
+    /// interface is active, the QML side draws its own context menu
+    void contextMenuRequested(bool show);
     void showToolbarEditorDialog();
 
     //visiblity signal
