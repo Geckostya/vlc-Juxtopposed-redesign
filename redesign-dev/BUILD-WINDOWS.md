@@ -54,7 +54,7 @@ powershell -ExecutionPolicy Bypass -File redesign-dev\windows\build.ps1
 
 или `C:\Projects\VLC\build.bat`.
 
-- Первый раз: конфигурация meson и полная компиляция (≈2300 целей, на 16 потоках около 20–30 минут).
+- Первый раз: конфигурация meson и полная компиляция (≈2300 целей; на 16 потоках ≈20 минут).
 - Дальше сборка инкрементальная: пересобирается только изменённое (правка QML — секунды).
 - Результат: `C:\Projects\VLC\build\vlc\vlc.exe` (+ `plugins\`, `libvlc.dll`, `libvlccore.dll`, lua, кэш плагинов).
 - Дерево сборки meson: `C:\Projects\VLC\build\win64-native`.
@@ -116,6 +116,8 @@ meson install -C $B\win64-native --no-rebuild
   - `modules/gui/qt/scripts/genqrc.py`, `genqmldir.py`: префиксы ресурсов QML всегда через `/`
     (иначе в `qmldir` попадал `:/qt/qml\VLC\Widgets/`, и QML не находил свои типы).
 - Не собираются (нет утилит): переводы (`msgfmt`) и Chromecast (`protoc`). Для редизайна это не важно.
+- Сообщения `Failed to run spirv-opt` во время сборки безвредны: `qsb` из Qt не находит оптимизатор SPIR-V
+  и кладёт шейдеры без оптимизации.
 
 ## Частые проблемы
 

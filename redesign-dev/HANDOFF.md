@@ -138,7 +138,7 @@ WinLibs GCC 14.3 + meson/ninja из Python venv + готовые контриб�
 + хост-утилиты Qt 6.8.3 из официальной сборки. Скрипты: `redesign-dev/windows/`.
 
 1. `setup.bat` (= `windows\setup.ps1`) — один раз, ≈10 минут: тулчейн и контрибы в `C:\Projects\VLC\build`.
-2. `build.bat` (= `windows\build.ps1`) — сборка, первая ≈20–30 минут, потом инкрементальная.
+2. `build.bat` (= `windows\build.ps1`) — сборка, первая ≈20 минут, потом инкрементальная.
    `-Reconfigure`, `-Clean`, `-Release`, `-Jobs N`. Результат: `C:\Projects\VLC\build\vlc\vlc.exe`.
 3. `run.bat [файл]` — запуск с новым UI. `run-classic.bat` — со старым.
    `run-debug.bat` — с подробным логом (ошибки QML пишутся в `C:\Projects\VLC\build\vlc-log.txt`).
