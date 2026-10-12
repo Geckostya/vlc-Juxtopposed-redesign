@@ -19,15 +19,34 @@ pragma Singleton
 
 import QtQuick
 
+import VLC.MainInterface
+
 // Design tokens of the redesigned interface.
 // Names follow the Figma variables ("Dark/BG/A3", "Dark/FG/A2", ...).
 QtObject {
     id: theme
 
-    property bool dark: true
+    // "dark", "light" or "system" (Settings > General > Theme), kept in the Qt settings
+    property string mode: MainCtx.settingValue("Redesign/theme", "dark")
+    property bool dark: mode === "system" ? Qt.styleHints.colorScheme !== Qt.Light : mode !== "light"
 
-    // User configurable accent ("General > Accent color" in the redesign)
-    property color accentOverride: "transparent"
+    // User configurable accent (Settings > General > Accent color), "" = default orange
+    property string accentSetting: MainCtx.settingValue("Redesign/accent", "")
+    property color accentOverride: accentSetting.length > 0 ? accentSetting : "transparent"
+
+    function setMode(m) {
+        mode = m
+        MainCtx.setSettingValue("Redesign/theme", m)
+    }
+    function setAccent(c) {
+        accentSetting = c
+        MainCtx.setSettingValue("Redesign/accent", c)
+    }
+
+    // accent tints derived from the user accent (the palette ones match the default orange)
+    readonly property color accentTrack: accentOverride.a > 0
+        ? Qt.rgba(accentOverride.r, accentOverride.g, accentOverride.b, dark ? 0.25 : 0.35)
+        : p.bgAccentBright
 
     readonly property QtObject darkPalette: QtObject {
         readonly property color bgA1: "#222222"
@@ -85,7 +104,7 @@ QtObject {
     readonly property color panelBackground: Qt.rgba(p.bgB1Transparent.r, p.bgB1Transparent.g, p.bgB1Transparent.b, 0.95)
     readonly property color railBackground: p.bgA4
     readonly property color trackBackground: p.bgB2
-    readonly property color trackFill: p.bgAccentBright
+    readonly property color trackFill: accentTrack
     readonly property color text: p.fgA2
     readonly property color textStrong: p.fg1
     readonly property color textItem: p.fgA1

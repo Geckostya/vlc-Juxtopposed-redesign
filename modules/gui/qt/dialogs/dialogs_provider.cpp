@@ -296,6 +296,16 @@ const QEvent::Type DialogEvent::DialogEvent_Type =
 
 void DialogsProvider::prefsDialog()
 {
+    if (var_InheritBool(p_intf, "qt-redesign"))
+    {
+        emit redesignSettingsRequested();
+        return;
+    }
+    classicPrefsDialog();
+}
+
+void DialogsProvider::classicPrefsDialog()
+{
     if (Q_LIKELY(!m_prefsDialog))
     {
         m_prefsDialog = new PrefsDialog( nullptr, p_intf );

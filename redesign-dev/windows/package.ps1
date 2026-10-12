@@ -22,6 +22,8 @@ New-Item -ItemType Directory -Force $Dir | Out-Null
 # everything needed at runtime; the SDK (headers, import libraries) is left out
 robocopy $Src $Dir /E /XD "$Src\sdk" /XF *.dll.a *.la /NFL /NDL /NJH /NJS /NP | Out-Null
 if ($LASTEXITCODE -ge 8) { throw 'robocopy failed' }
+# unzipping changes the file dates, the plugin cache would be stale and only slow the start down
+Remove-Item -Force -ErrorAction SilentlyContinue "$Dir\plugins\plugins.dat"
 
 $commit = if ($Commit) { $Commit } else { (git -C $Repo rev-parse --short HEAD).Trim() }
 @"
@@ -46,3 +48,4 @@ $hash = (Get-FileHash -Algorithm SHA256 $Zip).Hash.ToLower()
 
 Write-Host "[package] $Zip"
 Write-Host "[package] sha256 $hash"
+exit 0

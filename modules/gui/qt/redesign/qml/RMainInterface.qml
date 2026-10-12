@@ -43,8 +43,55 @@ Item {
     Accessible.name: qsTr("Main interface")
 
     Binding { target: Theme; property: "scale"; value: MainCtx.intfScaleFactor }
-    // the redesign is dark by default, "Day" selects the light variant
-    Binding { target: Theme; property: "dark"; value: MainCtx.colorScheme.scheme !== ColorSchemeModel.Day }
+    // dark/light/system and the accent are chosen in Settings > General (see Theme.mode)
+
+    // ---- secondary windows of the redesign, created on first use
+
+    function openSettings(category) {
+        settingsLoader.active = true
+        settingsLoader.item.openCategory(category)
+    }
+
+    Loader {
+        id: settingsLoader
+        active: false
+        sourceComponent: RSettingsWindow {
+            transientParent: root.Window.window
+        }
+    }
+
+    function openShortcuts() {
+        shortcutsLoader.active = true
+        shortcutsLoader.item.open()
+    }
+
+    Loader {
+        id: shortcutsLoader
+        active: false
+        sourceComponent: RShortcutsWindow {
+            transientParent: root.Window.window
+        }
+    }
+
+    Connections {
+        target: DialogsProvider
+        function onRedesignSettingsRequested() { root.openSettings("") }
+    }
+
+    // --qt-redesign-open=settings[:category] | shortcuts (development helper)
+    Component.onCompleted: {
+        const open = RedesignSettings.inheritedString("qt-redesign-open")
+        if (open.startsWith("settings"))
+            Qt.callLater(root.openSettings, open.split(":")[1] || "")
+        else if (open === "shortcuts")
+            Qt.callLater(root.openShortcuts)
+    }
+
+    Connections {
+        target: RWindows
+        function onSettingsRequested(category) { root.openSettings(category) }
+        function onShortcutsRequested() { root.openShortcuts() }
+    }
 
     // keep VLCStyle informed, some C++ helpers (tooltips, popups) rely on it
     Binding { target: VLCStyle; property: "appWidth"; value: root.width }

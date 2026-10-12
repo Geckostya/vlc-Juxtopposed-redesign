@@ -34,7 +34,7 @@ RMenu {
 
     RMenuSeparator { }
 
-    RAction { iconName: "hotkeys_2t";  text: qsTr("Keyboard Shortcuts");    onTriggered: DialogsProvider.prefsDialog() }
+    RAction { iconName: "hotkeys_2t";  text: qsTr("Keyboard Shortcuts");    onTriggered: RWindows.shortcutsRequested() }
     RAction { iconName: "paint_2t";    text: qsTr("Customize Player");      onTriggered: DialogsProvider.showToolbarEditorDialog() }
     RAction { iconName: "settings_2t"; text: qsTr("Settings");              shortcutText: "Ctrl + P"; onTriggered: DialogsProvider.prefsDialog() }
     RAction { iconName: "info_2t";     text: qsTr("About VLC");             shortcutText: "Shift + F1"; onTriggered: DialogsProvider.aboutDialog() }

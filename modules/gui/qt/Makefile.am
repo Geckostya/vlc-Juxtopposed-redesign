@@ -315,6 +315,8 @@ libqt_plugin_la_SOURCES = \
 	util/color_svg_image_provider.cpp util/color_svg_image_provider.hpp \
 	redesign/redesign_icon_provider.cpp \
 	redesign/redesign_icon_provider.hpp \
+	redesign/redesign_settings.cpp \
+	redesign/redesign_settings.hpp \
 	util/vlcaccess_image_provider.cpp util/vlcaccess_image_provider.hpp \
 	util/covergenerator.cpp \
 	util/covergenerator.hpp \
@@ -506,6 +508,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	util/workerthreadset.moc.cpp \
 	util/base_model.moc.cpp \
 	util/color_scheme_model.moc.cpp \
+	redesign/redesign_settings.moc.cpp \
 	util/ui_notifier.moc.cpp \
 	util/color_svg_image_provider.moc.cpp \
 	util/vlcaccess_image_provider.moc.cpp \
@@ -1519,28 +1522,62 @@ libqml_module_redesign_a_ModulePath = VLC/Redesign
 libqml_module_redesign_a_CXXFLAGS = $(libqt_plugin_la_CXXFLAGS)
 libqml_module_redesign_a_CPPFLAGS = $(libqt_plugin_la_CPPFLAGS)
 libqml_module_redesign_a_QML = \
+	redesign/qml/RAccentPicker.qml \
 	redesign/qml/RAction.qml \
+	redesign/qml/RAdvancedOptions.qml \
+	redesign/qml/RButton.qml \
 	redesign/qml/RCheckItem.qml \
 	redesign/qml/RChip.qml \
+	redesign/qml/RClearHistoryButton.qml \
+	redesign/qml/RColorField.qml \
 	redesign/qml/RContextMenu.qml \
 	redesign/qml/RControlBar.qml \
+	redesign/qml/RDropdown.qml \
+	redesign/qml/REqualizerBands.qml \
 	redesign/qml/RIcon.qml \
 	redesign/qml/RIconButton.qml \
 	redesign/qml/RIdleView.qml \
+	redesign/qml/RKeyField.qml \
 	redesign/qml/RMainInterface.qml \
 	redesign/qml/RMainMenu.qml \
 	redesign/qml/RMenu.qml \
 	redesign/qml/RMenuItem.qml \
 	redesign/qml/RMenuSeparator.qml \
+	redesign/qml/RModuleSwitch.qml \
+	redesign/qml/ROption.qml \
 	redesign/qml/RPanelButton.qml \
 	redesign/qml/RPlaybackPopup.qml \
 	redesign/qml/RPlayerView.qml \
 	redesign/qml/RQueueItem.qml \
 	redesign/qml/RQueuePanel.qml \
+	redesign/qml/RScrollBar.qml \
 	redesign/qml/RSectionHeader.qml \
 	redesign/qml/RSeekBar.qml \
+	redesign/qml/RSegmented.qml \
+	redesign/qml/RSettingRow.qml \
+	redesign/qml/RSettingsAudio.qml \
+	redesign/qml/RSettingsControls.qml \
+	redesign/qml/RSettingsExtensions.qml \
+	redesign/qml/RSettingsGeneral.qml \
+	redesign/qml/RSettingsInterface.qml \
+	redesign/qml/RSettingsLibrary.qml \
+	redesign/qml/RSettingsNetwork.qml \
+	redesign/qml/RSettingsPage.qml \
+	redesign/qml/RSettingsPerformance.qml \
+	redesign/qml/RSettingsPlayback.qml \
+	redesign/qml/RSettingsPrivacy.qml \
+	redesign/qml/RSettingsRecording.qml \
+	redesign/qml/RSettingsSearchPage.qml \
+	redesign/qml/RSettingsSection.qml \
+	redesign/qml/RSettingsSubtitles.qml \
+	redesign/qml/RSettingsVideo.qml \
+	redesign/qml/RSettingsWindow.qml \
+	redesign/qml/RShortcutsWindow.qml \
+	redesign/qml/RSwitch.qml \
 	redesign/qml/RTabBar.qml \
 	redesign/qml/RText.qml \
+	redesign/qml/RTextField.qml \
+	redesign/qml/RTickSlider.qml \
 	redesign/qml/RTimeLabel.qml \
 	redesign/qml/RToolTip.qml \
 	redesign/qml/RTopBar.qml \
@@ -1551,6 +1588,7 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RVolumeCone.qml \
 	redesign/qml/RWindowButton.qml
 libqml_module_redesign_a_Singleton_QML = \
+	redesign/qml/RWindows.qml \
 	redesign/qml/Theme.qml
 libqml_module_redesign_a_SOURCES = $(QML_MODULE_redesign_SRC)
 nodist_libqml_module_redesign_a_SOURCES = redesign/qmlassets.cpp $(QML_MODULE_redesign_NODIST_EXTRA)

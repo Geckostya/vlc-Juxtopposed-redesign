@@ -47,6 +47,7 @@
 #include "util/kirigamiwheelhandler.hpp"
 #include "util/color_svg_image_provider.hpp"
 #include "redesign/redesign_icon_provider.hpp"
+#include "redesign/redesign_settings.hpp"
 #include "util/effects_image_provider.hpp"
 #include "util/vlcaccess_image_provider.hpp"
 #include "util/csdbuttonmodel.hpp"
@@ -233,6 +234,8 @@ void MainUI::registerQMLTypes()
 
         // @uri VLC.MainInterface
         qmlRegisterSingletonInstance<MainCtx>(uri, versionMajor, versionMinor, "MainCtx", m_mainCtx);
+        qmlRegisterSingletonInstance<RedesignSettings>(uri, versionMajor, versionMinor, "RedesignSettings",
+                                                       new RedesignSettings(m_intf, this));
 #ifdef _WIN32
         assert(dynamic_cast<MainCtxWin32*>(m_mainCtx));
         qmlRegisterAnonymousType<MainCtxWin32>(uri, versionMajor);

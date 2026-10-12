@@ -360,6 +360,10 @@ vlc_module_begin ()
     add_shortcut("qt")
 
     add_bool( "qt-redesign", true, QT_REDESIGN_TEXT, QT_REDESIGN_LONGTEXT )
+    /* development helper: opens a window of the redesign at startup
+     * ("settings", "settings:<category>", "shortcuts"), for screenshots and testing */
+    add_string( "qt-redesign-open", "", "Redesign window opened at startup", nullptr )
+        change_volatile()
 
     add_bool( "qt-minimal-view", false, QT_MINIMAL_MODE_TEXT,
               nullptr )
