@@ -1,44 +1,45 @@
 # Редизайн VLC: передача работы
 
 > **Начните отсюда.** Документ описывает всё, чтобы продолжить работу без предыдущей переписки.
-> Копия лежит в репозитории: `Source\redesign-dev\HANDOFF.md`.
+> Копии: `C:\Projects\VLC\HANDOFF.md` и `Source\redesign-dev\HANDOFF.md` (в git).
+> Состояние на 2026-10-13, ветка `redesign/stage1` запушена в `origin`
+> (https://github.com/Geckostya/vlc-Juxtopposed-redesign).
 
 ## 0. Где что лежит
 
 ```
 C:\Projects\VLC\
 ├── HANDOFF.md              ← этот документ
-├── setup.bat               ← разовая установка окружения сборки (нативно, без WSL)
-├── build.bat               ← сборка VLC под Windows (вызывает Source\redesign-dev\build.bat)
+├── setup.bat               ← разовая установка окружения сборки (нативно, без WSL/MSYS)
+├── build.bat               ← сборка (вызывает Source\redesign-dev\build.bat → windows\build.ps1)
 ├── run.bat                 ← запуск с новым интерфейсом
 ├── run-classic.bat         ← запуск с классическим интерфейсом VLC 4
 ├── run-debug.bat           ← запуск с подробным логом в build\vlc-log.txt
-├── build\                  ← тулчейн, контрибы, дерево сборки (build\win64-native)
-│   └── vlc\                ← собранный VLC (vlc.exe)
+├── build\                  ← тулчейн, контрибы, деревья сборки (в git не входит)
+│   ├── win64-native\       ← дерево сборки meson (debugoptimized)
+│   ├── vlc\                ← собранный VLC (vlc.exe)
+│   ├── win64-release\, vlc-release\, dist\   ← release-сборка и zip релиза
+├── release-src\            ← снимок коммита, из которого собран релиз 0.1.0 (можно удалить)
 ├── RedesignSources\
 │   ├── Figma-Link.txt
 │   ├── FigmaExport\        ← PNG + SVG всех фреймов макета (главный источник)
 │   ├── Video.mp4, VideoTranscription.txt
-├── Source\                 ← git-репозиторий VLC 4 (форк), ветка redesign/stage1
-│   ├── CLAUDE.md           ← короткая памятка для Claude Code
-│   ├── modules\gui\qt\redesign\   ← новый интерфейс (QML, иконки, провайдер иконок)
-│   └── redesign-dev\       ← скрипты сборки (bat, windows\, старый wsl\), BUILD-WINDOWS.md, нарезка иконок, копия этого документа
-└── redesign-stage1.patch   ← устарел (всё уже в коммите), можно удалить
+└── Source\                 ← git-репозиторий VLC 4 (форк), ветка redesign/stage1
+    ├── CLAUDE.md           ← короткая памятка для Claude Code
+    ├── modules\gui\qt\redesign\   ← новый интерфейс: qml\, icons\, C++ мосты
+    └── redesign-dev\       ← скрипты сборки (windows\, старый wsl\), BUILD-WINDOWS.md,
+                              tools\ (нарезка иконок, sync_qml_lists.py), этот документ
 ```
 
-Корневые `.bat` — это обёртки: настоящие скрипты лежат в `Source\redesign-dev\`
-и закоммичены вместе с кодом.
-
-## 0.1. Промпт для нового (локального) чата
+## 0.1. Промпт для нового чата
 
 Скопируйте в новый чат Claude Code, открытый в `C:\Projects\VLC\Source`:
 
 ```
 Продолжаем реализацию редизайна VLC. Прочитай C:\Projects\VLC\HANDOFF.md целиком
-(и CLAUDE.md в корне репозитория). Сначала выполни шаг «Первые действия» из раздела 7:
-пересобери проект через C:\Projects\VLC\build.bat (инструкция: Source\redesign-dev\BUILD-WINDOWS.md),
-запусти run-debug.bat с видео и допроверь пункты из «Не проверено».
-Потом переходи к этапу 2 (библиотека). Макеты: C:\Projects\VLC\RedesignSources\FigmaExport.
+(и CLAUDE.md в корне репозитория). Пересобери проект через C:\Projects\VLC\build.bat
+(инструкция: Source\redesign-dev\BUILD-WINDOWS.md), затем продолжай с раздела 7
+«Следующие шаги». Макеты: C:\Projects\VLC\RedesignSources\FigmaExport.
 Общайся со мной по-русски.
 ```
 
@@ -48,162 +49,150 @@ C:\Projects\VLC\
 
 - Figma: «VLC Redesign (Community)»,
   https://www.figma.com/design/Xb9N9UxYo7xxr7d9ujuxlV/VLC-Redesign--Community-
-- Экспорт всех фреймов в PNG и SVG: `C:\Projects\VLC\RedesignSources\FigmaExport\`.
-  Figma MCP упирается в лимит бесплатного плана, поэтому работаем по экспорту.
+- Экспорт всех фреймов в PNG и SVG: `C:\Projects\VLC\RedesignSources\FigmaExport\`
+  (Figma MCP упирается в лимит бесплатного плана, работаем по экспорту).
 - Видео автора с объяснениями решений: `RedesignSources\Video.mp4`,
-  транскрипция: `RedesignSources\VideoTranscription.txt`.
-  Транскрипцию стоит прочитать целиком: в ней объяснено, почему элементы стоят там, где стоят.
+  транскрипция `RedesignSources\VideoTranscription.txt` — стоит прочитать целиком.
 
 Пожелание владельца: сохранить всю функциональность VLC, а UI сделать с нуля.
+Владелец общается по-русски, проверяет сборки сам на этой машине и присылает списки багов.
 
 ## 2. Принятые решения
 
-1. **UI пишется с нуля на Qt Quick (QML) отдельным модулем `VLC.Redesign`**
-   (`modules/gui/qt/redesign/`). Его корень — `RMainInterface.qml`.
-   Старый QML не трогаем. Это даёт два преимущества:
-   - используется готовый C++-фасад Qt-модуля: `Player` (PlayerController),
-     `MainPlaylistController`, ML-модели, `DialogsProvider`, `MainCtx`;
-   - используются готовые композиторы видео (DirectComposition на Windows, X11, Wayland).
-     Это самая сложная часть, и переписывать её без Qt пришлось бы месяцами.
-2. **Включение:** опция `qt-redesign` (bool, по умолчанию `true`) в `qt.cpp`.
-   `--no-qt-redesign` возвращает классический интерфейс.
+1. **UI пишется с нуля на Qt Quick (QML) модулем `VLC.Redesign`** (`modules/gui/qt/redesign/qml/`),
+   корень — `RMainInterface.qml`. Старый QML не трогаем. Используем готовый C++-фасад Qt-модуля
+   (`Player`, `MainPlaylistController`, ML-модели, `DialogsProvider`, `MainCtx`) и готовые
+   композиторы видео (DirectComposition на Windows).
+2. **Включение:** опция `qt-redesign` (по умолчанию `true`), `--no-qt-redesign` — классический UI.
    Корневой QML выбирается в `maininterface/mainui.cpp`.
-3. **Контекстное меню видео:** если включён редизайн, `DialogsProvider` вместо нативного
-   QMenu испускает сигнал `contextMenuRequested(bool show)`. QML рисует своё меню (`RContextMenu.qml`).
-4. **Иконки:** 206 штук нарезаны из `FigmaExport/Icon.svg` скриптом
-   `redesign-dev/tools/split_icons.py`. Основной цвет в файлах — `#FF00FF`, акцентный — `#FF8800`.
-   Перекрашивает их **синхронный** провайдер `image://redesignicon/<name>?c=<цвет>&a=<акцент>`
-   (`redesign/redesign_icon_provider.cpp`).
-   Асинхронный `svgcolor` провайдер не использовать: на машинах с малым числом ядер
-   он заводит глобальный QThreadPool в дедлок (растеризатор SVG ждёт потоки того же пула),
-   и окно остаётся пустым.
-5. **Токены дизайна:** `redesign/qml/Theme.qml` — синглтон, имена повторяют переменные Figma
-   (`Dark/BG/A3` → `p.bgA3` и т. д.). Размеры задаются в 1x через `Theme.dp()`.
-   По умолчанию тема тёмная, светлая включается схемой «Day».
-6. **Сборка:** в обеих системах, meson.build и Makefile.am. Под Windows собираем через meson
-   (флаг `-m` в `extras/package/win32/build.sh`), этот путь проверен.
-7. **Окончания строк:** рабочая копия на Windows была с CRLF (core.autocrlf не был задан),
-   из-за этого `git status` показывал тысячи изменённых файлов. Поставлен `core.autocrlf=true`.
-   Скрипты сборки в `redesign-dev/` закреплены через `.gitattributes`
-   (`*.sh`/`*.py` всегда LF, `*.bat` всегда CRLF).
+3. **Окна и диалоги — отдельные QML `Window`** (настройки, горячие клавиши, диалоги), без рамки ОС,
+   со своим заголовком и перетаскиванием. Их создаёт `RMainInterface` по сигналам синглтона
+   `RWindows.qml` (`settingsRequested`, `shortcutsRequested`, `networkStreamRequested`,
+   `newPlaylistRequested`, `addSubtitlesRequested`, `effectsRequested`).
+4. **Перехват классических диалогов:** при редизайне `DialogsProvider::prefsDialog()` испускает
+   `redesignSettingsRequested()`; классическое окно — `classicPrefsDialog()`. Контекстное меню видео:
+   `DialogsProvider` испускает `contextMenuRequested(bool)`, QML рисует `RContextMenu.qml` в точке
+   `MainCtx.cursorPos()` (над видео HoverHandler курсор не видит).
+5. **Иконки:** 206 штук нарезаны из `FigmaExport/Icon.svg` (`redesign-dev/tools/split_icons.py`),
+   основной цвет `#FF00FF`, акцент `#FF8800`, перекрашивает **синхронный** провайдер
+   `image://redesignicon/<name>?c=&a=` (асинхронный `svgcolor` дедлочит QThreadPool).
+6. **Токены дизайна:** синглтон `Theme.qml`, имена как в Figma (`p.bgA3` …), размеры через `Theme.dp()`.
+   Тема `dark|light|system` и акцент — в Qt-настройках (`Redesign/theme`, `Redesign/accent`).
+7. **Мосты C++ для QML** (`redesign/*.cpp`, регистрируются синглтонами в `mainui.cpp`, uri `VLC.MainInterface`):
+   - `RedesignSettings` — конфиг VLC: `option(name)` (тип, текст, longtext, значение, choices, min/max),
+     `setValue`, `advancedOptions(subcats, exclude)`, `search`, горячие клавиши, нативные пикеры
+     файла/папки/цвета/шрифта, `listFiles`, `inheritedString` (значение с учётом командной строки).
+   - `RedesignEffects` — живые фильтры видео/аудио (как классический «Effects and Filters»: на
+     текущем vout/aout + в конфиг), пресеты эквалайзера, `enqueueWithSubtitles`.
+8. **Advanced Options на каждой странице настроек** — все остальные опции «области» (подкатегории
+   `vlc_config_subcat`), сгруппированные по модулю. Так ничего из классических «All» не теряется.
+9. **Сборка:** нативно под Windows (раздел 4). Списки QML-файлов в `meson.build` и `Makefile.am`
+   генерирует `python redesign-dev/tools/sync_qml_lists.py` — запускать после добавления файла.
+   Новые QML-файлы получают GPL-заголовок, как остальные.
+10. **Подводные камни QML в этой сборке:** нет `Canvas` (пунктир — `RDashedLine`), нет
+    `QtQuick.Dialogs` (пикеры через C++), `default property alias` в корне компонента ловит и
+    собственных детей файла — в таких компонентах дети объявлены явным списком `data: [...]`.
 
-## 3. Что сделано (этап 1: плеер)
+## 3. Что сделано
 
-Файлы в `modules/gui/qt/redesign/qml/`:
+### Этап 1: плеер
+`RPlayerView` (видео во всё окно, бары с автоскрытием), `RTopBar` (конус, меню «…», заголовок,
+кнопки окна; в полноэкранном режиме меню открывает весь левый верхний угол), `RControlBar`
+(prev/play/next, время, `RSeekBar`, конус громкости, аудио, субтитры, настройки воспроизведения,
+очередь), `RTracksPopup` (дорожки Video/Audio/Subtitles), `RPlaybackPopup` (скорость, задержки,
+A-B, снимок, запись, реверс), `RQueuePanel` (Queue/Bookmarks/Chapters), `RMainMenu`, `RContextMenu`,
+`RIdleView`, базовые компоненты.
 
-| Файл | Что это |
-|------|---------|
-| `RMainInterface.qml` | корень: DropArea, тултипы, глобальные шорткаты, CSD-ресайз |
-| `RPlayerView.qml` | экран плеера: видео во всё окно, бары с автоскрытием, панели, меню |
-| `RTopBar.qml`, `RWindowButton.qml` | верхняя панель: конус, меню «…», заголовок, кнопки окна |
-| `RControlBar.qml` | нижняя панель: prev/play/next, время, `RSeekBar`, громкость `RVolumeCone`, аудио, субтитры, настройки воспроизведения, очередь |
-| `RTracksPopup.qml`, `RTrackPage.qml` | попап Video / Audio / Subtitles: дорожки, устройство вывода, «Show Preferences» |
-| `RPlaybackPopup.qml` | скорость, задержки субтитров и звука, A-B, снимок, запись, реверс |
-| `RQueuePanel.qml`, `RQueueItem.qml` | правая панель Queue / Bookmarks / Chapters |
-| `RMainMenu.qml`, `RContextMenu.qml`, `RMenu*.qml`, `RAction.qml` | меню «…» и меню правой кнопки |
-| `RIdleView.qml` | экран без видео: обложка для музыки, конус и «Open media» |
-| `RIcon`, `RIconButton`, `RText`, `RToolTip`, `RTabBar`, `RSectionHeader`, `RCheckItem`, `RPanelButton`, `RChip`, `RValueSlider`, `RTimeLabel`, `RTrackList` | базовые компоненты |
+### Этап 3: настройки и горячие клавиши
+- `RSettingsWindow` + страницы `RSettings<General|Interface|Privacy|Controls|Playback|Video|Audio|Subtitles|Library|Network|Performance|Recording|Extensions>.qml`,
+  поиск по всем опциям (`RSettingsSearchPage`), Advanced Options (`RAdvancedOptions`).
+- Строка, привязанная к опции VLC: `ROption { name: "..."; title: qsTr("...") }` — контрол
+  выбирается по типу (switch, dropdown, slider, text, path+Browse, color). Опции, которых нет в
+  сборке, прячутся сами.
+- Контролы: `RSwitch`, `RDropdown` (с иконками у пунктов), `RSegmented`, `RTickSlider`, `RTextField`,
+  `RColorField`, `RAccentPicker`, `RModuleSwitch` (модуль в списке вроде `audio-filter`/`extraintf`),
+  `RButton`, `RSettingRow` (подпись + «i» с описанием).
+- `RShortcutsWindow` + `RKeyField`: поиск, обычные и глобальные клавиши, снятие конфликтов,
+  Save/Cancel (применяется после перезапуска VLC).
 
-### Как проверялось
+### Этап 4: эффекты и диалоги
+- Эффекты — внизу попапа дорожек («Video effects» / «Audio effects and equalizer»), также из
+  попапа воспроизведения: `RVideoEffects` (картинка, резкость, бандинг, зерно, цвета, поворот,
+  кадрирование `RCropEditor`), `RAudioEffects` (эквалайзер `REqualizerBands` с пресетами,
+  компрессор, спатиалайзер, стерео-расширение, высота тона, прочие фильтры), `RCollapsible`,
+  `REffectSlider`, `RFilterSwitch`.
+- Диалоги (`RDialogWindow` — общая рамка): `RNetworkStreamDialog` (несколько URL, плейлист в
+  медиатеке), `RNewPlaylistDialog` (drag-and-drop), `RAddSubtitlesDialog` (пары видео ↔ субтитры
+  по имени или S01E05, «Play with subtitles»), `RPlaylistSaver` (грузится Loader'ом: модуль
+  `VLC.MediaLibrary` есть только с медиатекой).
 
-Linux-сборка в облаке (Ubuntu 24.04, Qt 6.4, meson), запуск под Xvfb + openbox
-с `QT_QUICK_BACKEND=software --qt-compositor=dummy`, сверка скриншотов с макетом.
-Проверены: idle-экран, плеер с аудио, попап субтитров, очередь, меню «…»,
-меню правой кнопки, попап воспроизведения, заливка конуса громкости.
+### Сборка, релиз
+- Нативная сборка под Windows, раздел 4.
+- **Релиз vlc-redesign-0.1.0 (Windows x64) опубликован** владельцем:
+  https://github.com/Geckostya/vlc-Juxtopposed-redesign/releases/tag/vlc-redesign-0.1.0
+  (собран из коммита `8c99ab68f2` — только этап 1). Следующий релиз: `build.bat -Release`,
+  затем `redesign-dev\windows\package.ps1 -Version 0.2.0`, черновик через `gh release create --draft`;
+  публикует владелец.
 
-2026-10-12: нативная сборка под Windows (см. раздел 4) собрана и запущена с видео
-(`RedesignSources\Video.mp4`): верхняя и нижняя панели видны поверх видео, конус громкости залит,
-правый клик открывает новое QML-меню, ошибок QML в логе нет.
+### Проверено вживую (Windows, 2026-10-12/13)
+Видео с панелями поверх, конус громкости, меню ПКМ под курсором (подтвердил владелец), все
+13 страниц настроек и их Advanced Options, окно горячих клавиш, три диалога, панели эффектов,
+полноэкранное меню. Проверка — скриншотами через `PrintWindow` и опцию `--qt-redesign-open`.
 
-### Не проверено
-
-- **Громкость с реальным аудиовыходом**: конус заливается (mmdevice), но изменение громкости мышью не проверялось.
-- **Автоскрытие баров, попапы дорожек/воспроизведения, очередь** на Windows не прокликивались.
-- Меню правой кнопки на Windows открылось у верхнего края окна, а не под курсором (экран с масштабом 150%) — проверить позиционирование.
-- **Сборка через autotools** (Makefile.am правился, но не собирался).
-
-### Известные упрощения этапа 1
-
-- «Customize Player» в меню «…» открывает старое окно VLC (этап 5).
-- Пункты Video / Audio / Subtitle в меню правой кнопки открывают попап дорожек, а не подменю.
-- Кнопка сайдбара библиотеки и «папка» в верхней панели скрыты
-  (`RTopBar.libraryAvailable: false`) до этапа 2.
-- В экспорте не было иконки «check» по умолчанию, `check.svg` взят из состояния «active».
-  `repeat_one`, `trash`, `media`, `playing`, `tab_*` нарисованы или взяты из других фреймов.
-
-## 3.1. Этапы 3 и 4 (2026-10-13): настройки, горячие клавиши, эффекты, диалоги
-
-| Что | Файлы |
-|-----|-------|
-| Окно настроек: поиск, 13 категорий, «Advanced Options» со всеми прочими опциями области | `RSettingsWindow.qml`, `RSettings<Категория>.qml`, `RSettingsPage`, `ROption`, `RAdvancedOptions`, контролы `RSwitch`, `RDropdown`, `RSegmented`, `RTickSlider`, `RTextField`, `RColorField`, `RAccentPicker`, `RModuleSwitch` |
-| Мост к конфигу VLC (описание опций, значения, поиск, горячие клавиши, нативные диалоги выбора) | `redesign/redesign_settings.*` (синглтон `RedesignSettings`) |
-| Окно горячих клавиш | `RShortcutsWindow.qml`, `RKeyField.qml` |
-| Живые эффекты видео/аудио в попапе дорожек (кнопки внизу попапа) | `RVideoEffects`, `RAudioEffects`, `RCollapsible`, `REffectSlider`, `RFilterSwitch`, `RCropEditor`, `REqualizerBands`; C++: `redesign/redesign_effects.*` (`RedesignEffects`) |
-| Диалоги: сетевой поток, новый плейлист, субтитры к папке | `RDialogWindow`, `RNetworkStreamDialog`, `RNewPlaylistDialog`, `RAddSubtitlesDialog`, `RPlaylistSaver` |
-| Запросы окон из любого места | синглтон `RWindows.qml`; окна создаёт `RMainInterface` |
-
-- Тема (тёмная/светлая/системная) и акцент хранятся в Qt-настройках (`Redesign/theme`, `Redesign/accent`), см. `Theme.qml`.
-- С редизайном `DialogsProvider::prefsDialog()` открывает новое окно; классическое — `classicPrefsDialog()` (Settings > General).
-- Для скриншотов: `vlc --qt-redesign-open=settings:<категория>|shortcuts|network|playlist|subtitles:<url>|effects:video|effects:audio`.
-- Canvas в Qt из контрибов нет: пунктир рисует `RDashedLine`.
-- Новые QML-файлы добавлять в списки командой `python redesign-dev/tools/sync_qml_lists.py`.
-- Не сделано: HDR-опции, профили, онбординг, кастомизация панели (этап 5), библиотека (этап 2).
+### Не проверено / известные упрощения
+- Управление громкостью мышью, автоскрытие баров при обычном использовании — проверяет владелец.
+- Живые эффекты проверены только на открытие панелей, не на слух/глаз.
+- «Customize Player» открывает старое окно (этап 5). Пункты Video/Audio/Subtitle в ПКМ открывают
+  попап дорожек, а не подменю.
+- HDR-опции, профили, онбординг, библиотека не сделаны.
+- Сборка через autotools не проверялась (Makefile.am поддерживается).
 
 ## 4. Сборка и запуск на Windows
 
-**Подробная инструкция: `redesign-dev/BUILD-WINDOWS.md`.** Сборка нативная, без WSL и MSYS2:
-WinLibs GCC 14.3 + meson/ninja из Python venv + готовые контрибы CI VideoLAN (job «win64»)
-+ хост-утилиты Qt 6.8.3 из официальной сборки. Скрипты: `redesign-dev/windows/`.
+**Подробно: `redesign-dev/BUILD-WINDOWS.md`.** WinLibs GCC 14.3 + meson/ninja из Python venv +
+готовые контрибы CI VideoLAN (job «win64») + хост-утилиты Qt 6.8.3. Скрипты: `redesign-dev/windows/`.
 
-1. `setup.bat` (= `windows\setup.ps1`) — один раз, ≈10 минут: тулчейн и контрибы в `C:\Projects\VLC\build`.
-2. `build.bat` (= `windows\build.ps1`) — сборка, первая ≈20 минут, потом инкрементальная.
-   `-Reconfigure`, `-Clean`, `-Release`, `-Jobs N`. Результат: `C:\Projects\VLC\build\vlc\vlc.exe`.
-3. `run.bat [файл]` — запуск с новым UI. `run-classic.bat` — со старым.
-   `run-debug.bat` — с подробным логом (ошибки QML пишутся в `C:\Projects\VLC\build\vlc-log.txt`).
+1. `setup.bat` — один раз (~10 мин): всё в `C:\Projects\VLC\build`.
+2. `build.bat` — сборка (первая ~20 мин, потом инкрементальная). Флаги: `-Reconfigure` (после
+   добавления QML-файлов — обязательно, qrc генерируется при конфигурации), `-Clean`, `-Release`.
+   Перед сборкой закройте VLC, иначе установка упадёт (файлы заняты).
+3. `run.bat [файл]`, `run-classic.bat`, `run-debug.bat` (лог `build\vlc-log.txt`).
 
-Старый путь через WSL остался в `redesign-dev/wsl/` (`setup-wsl.bat`, `build-wsl.bat`).
+Отладка падений: `build\toolchain\mingw64\bin\gdb.exe -batch -ex run -ex bt --args build\vlc\vlc.exe ...`
 
-Быстрая итерация по QML без сборки под Windows: собрать под Linux/WSL нативно
-(`meson setup build -Dqt=enabled -Dlua=disabled`, Qt 6 из apt) и запускать `build/bin/vlc`.
-Для запуска из дерева сборки нужны `VLC_PLUGIN_PATH` и `VLC_LIB_PATH=<build>/modules`,
-а `vlc-qt-check` должен лежать в `PKGLIBEXECDIR`.
+Открыть окно редизайна при старте (для скриншотов и тестов):
+`vlc --qt-redesign-open=settings[:категория[:advanced]]|shortcuts|network|playlist|subtitles:<url>|effects:video|effects:audio`
+(`--qt-pin-controls` держит панели видимыми).
 
-## 5. Следующие этапы
+## 5. Полезное про код VLC
+
+- QML-модули Qt-плагина: `modules/gui/qt/meson.build` (`qml_modules`) и `Makefile.am`.
+- Иконки: `assets.qrc` под `/redesign/icons` + `libqt_plugin_la_RES` в `Makefile.am`.
+- Плеер для QML: `player/player_controller.hpp`; очередь: `playlist/playlist_controller.hpp`
+  (`prev()` — предыдущий файл, `prevOrReset()` — перемотка в начало); модель строк
+  `playlist/playlist_model.hpp`.
+- Дорожки: роли `display`, `checked`; выбор `model.checked = true`.
+- Медиатека в QML: модуль `VLC.MediaLibrary` (`MediaLib`, `MLPlaylistListModel.create(name, urls)`,
+  `MLRecentMediaModel` и др.), регистрируется только если медиатека включена.
+- Подкатегории конфига: `include/vlc_plugin.h` (`SUBCAT_*`); у некоторых нет имени —
+  `vlc_config_subcat_GetName()` тогда падает, используйте `vlc_config_subcat_Find()`.
+- `config_GetType()` возвращает `VLC_VAR_*`, а не `CONFIG_ITEM_*`.
+
+## 6. История (кратко)
+
+- Исходники: форк `Geckostya/vlc-Juxtopposed-redesign` (master = VLC 4.0-dev, коммит a5538c5).
+- Отказались от отдельного приложения на libVLC — нужна полная функциональность VLC.
+- Этап 1 сделан и проверен в облачной Linux-сборке; затем нативная сборка под Windows,
+  релиз 0.1.0, этапы 3 и 4, раунд исправлений по отзывам владельца (краш Advanced Options,
+  эквалайзер в попапе, меню «…» в полноэкранном режиме, ПКМ → новые настройки, «Предыдущий»).
+
+## 7. Следующие шаги
 
 | Этап | Что | Источник в FigmaExport |
 |------|-----|------------------------|
-| 2 | Сайдбар библиотеки (компактный в плеере и полный экран), Home, Videos/Music/Network/Playlists/Recent, музыкальный плеер, миниплеер, сортировка и вид, «unviewed/viewed» | `Player-1..6.png`, `Player - Music*.png`, `Miniplayer.png`, `Sorting Options`, `View Options`, `*context menu` |
-| 3 | Окно настроек (13 категорий, 19 экранов, advanced внизу каждой категории), окно горячих клавиш | `Settings - *.png`, `Keyboard Shortcuts.png` |
-| 4 | Диалоги: добавить субтитры к файлу/папке/плейлисту, сетевой поток, новый плейлист, сайдбар эффектов (Video/Audio/Subtitles/Playback с пресетами, EQ, таймлайн субтитров) | `Add Subtitles to Playlist/`, `Open network stream.png`, `new playlist.png`, `Audio - *.png`, `Video - *.png`, `EQ*.png`, `Controls.png` |
-| 5 | Онбординг, кастомизация панели drag-and-drop, профили | `Onboarding*.png`, `Player - customize*.png`, `Profiles.png` |
+| 2 | Сайдбар библиотеки (компактный в плеере и полный экран), Home, Videos/Music/Network/Playlists/Recent, музыкальный плеер, миниплеер, сортировка и вид, «unviewed/viewed», контекстные меню файлов/папок/плейлистов | `Player-1..6.png`, `Player - Music*.png`, `Miniplayer.png`, `Sorting Options`, `View Options`, `*context menu.png`, `sidebar.png`, `media.png`, `thumbnail.png` |
+| 5 | Онбординг, кастомизация панели drag-and-drop, профили, светлая тема по макету `Player - Light`, «hide UI» | `Onboarding*.png`, `Player - customize*.png`, `Profiles.png`, `Player - Light.png`, `Player - hide UI.png` |
+| 4+ | Остатки эффектов: HDR-опции, пресеты настроек («Setting Preset»), визуализатор, таймлайн субтитров | `HDR Options.png`, `Setting Preset.png`, `Audio Visualizer.png`, `sub filename.png`, `subtitle one/multiple.png` |
 
-Для библиотеки нужен medialibrary. В облачной Linux-сборке его не было (в Ubuntu 24.04 лежит 0.12, а нужен ≥ 0.13).
-В Windows-сборке medialibrary приходит с контрибами.
-
-## 6. Полезное про код VLC
-
-- Все QML-модули Qt-плагина перечислены в `modules/gui/qt/meson.build` (`qml_modules`) и в `Makefile.am`.
-  Синглтоны помечаются отдельно. Ресурсы модуля инициализируются в `qt.cpp` (`Q_INIT_RESOURCE(redesign_assets)`).
-- Иконки лежат в `assets.qrc` под префиксом `/redesign/icons`. Новую иконку нужно добавить туда
-  и в `libqt_plugin_la_RES` в `Makefile.am`.
-- Свойства плеера для QML: `modules/gui/qt/player/player_controller.hpp` (Q_PROPERTY и public slots).
-  Очередь: `playlist/playlist_controller.hpp`, модель строк: `playlist/playlist_model.hpp`
-  (роли `title`, `duration`, `isCurrent`, `artwork`).
-- Модели дорожек отдают роли `display` и `checked`. Выбор делается через `model.checked = true`,
-  снятие — через `setData(index, false, Qt.CheckStateRole)`.
-- Все диалоги вызываются через `DialogsProvider.*` (`dialogs/dialogs_provider.hpp`).
-
-## 7. Первые действия для следующего исполнителя
-
-1. `C:\Projects\VLC\setup.bat`, затем `C:\Projects\VLC\build.bat` (на этой машине уже сделано,
-   `build.bat` достаточно для инкрементальной пересборки). При проблемах — таблица в `BUILD-WINDOWS.md`.
-2. `C:\Projects\VLC\run-debug.bat <видеофайл>` — допроверить пункты из «Не проверено» выше.
-3. Ветка `redesign/stage1` ещё ни разу не пушилась: `git push -u origin redesign/stage1`.
-4. Переходить к этапу 2 (библиотека).
-
-## 8. История (кратко)
-
-- Исходники: форк `Geckostya/vlc-Juxtopposed-redesign` (master = VLC 4.0-dev, коммит a5538c5).
-- Рассматривали отдельное приложение на libVLC (Avalonia/Rust) — отказались, т.к. владелец хочет полную функциональность VLC; выбран новый QML-интерфейс поверх существующего C++-слоя.
-- Иконки и макеты сначала брались через Figma MCP, потом упёрлись в лимит Starter-плана; владелец выгрузил FigmaExport — дальше работаем только по нему.
-- Этап 1 собран и проверен скриншотами в облачной Linux-сборке; коммит `f559a5de42` + этот документ в следующем коммите.
+В `RTopBar` кнопка сайдбара и «папка» скрыты флагом `libraryAvailable: false` — включить на этапе 2.
+Медиатека в Windows-сборке есть (приходит с контрибами).
