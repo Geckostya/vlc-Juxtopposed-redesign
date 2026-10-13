@@ -32,6 +32,8 @@ Item {
         const walk = (item) => {
             for (let i = 0; i < item.children.length; ++i) {
                 const c = item.children[i]
+                // Generated advanced rows must not feed their own exclusion list.
+                if (c.advancedOptionGroup === true) continue
                 if (typeof c.name === "string" && c.reload !== undefined)
                     names.push(c.name)
                 walk(c)

@@ -23,6 +23,7 @@ import VLC.Dialogs
 RMenu {
     id: root
 
+    iconName: "profile_2t"
     title: RProfiles.current.length > 0 ? qsTr("Profile (%1)").arg(RProfiles.current) : qsTr("Profile")
 
     property Instantiator entries: Instantiator {

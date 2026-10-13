@@ -26,6 +26,9 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QFile>
+#include <QSaveFile>
+#include <QRegularExpression>
 #include <QUrl>
 #include <QFontDialog>
 #include <QHash>
@@ -499,7 +502,8 @@ QString RedesignSettings::directoryOf(const QString &url) const
     const QUrl u(url);
     if (!u.isLocalFile())
         return {};
-    return QUrl::fromLocalFile(QFileInfo(u.toLocalFile()).absolutePath()).toString(QUrl::FullyEncoded);
+    const QFileInfo file(u.toLocalFile());
+    return QUrl::fromLocalFile(file.isDir() ? file.absoluteFilePath() : file.absolutePath()).toString(QUrl::FullyEncoded);
 }
 
 QString RedesignSettings::pickColor(const QString &current) const
@@ -513,4 +517,93 @@ QString RedesignSettings::pickFont(const QString &current) const
     bool ok = false;
     const QFont f = QFontDialog::getFont(&ok, QFont(current), nullptr, qtr("Select font"));
     return ok ? f.family() : QString();
+}
+
+bool RedesignSettings::moduleAvailable(const QString &name) const
+{
+    return module_exists(qtu(name));
+}
+
+QVariantMap RedesignSettings::snapshot() const
+{
+    QVariantMap result;
+    size_t count;
+    module_t **list = module_list_get(&count);
+    for (size_t i = 0; i < count; ++i)
+    {
+        unsigned size;
+        module_config_t *config = module_config_get(list[i], &size);
+        for (unsigned j = 0; j < size; ++j)
+        {
+            const auto &item = config[j];
+            if (!CONFIG_ITEM(item.i_type) || item.i_type == CONFIG_ITEM_PASSWORD
+                || !item.psz_name)
+                continue;
+            result[qfu(item.psz_name)] = currentValue(item.psz_name, item.i_type);
+        }
+        module_config_free(config);
+    }
+    module_list_free(list);
+    return result;
+}
+
+void RedesignSettings::restore(const QVariantMap &values)
+{
+    for (auto it = values.cbegin(); it != values.cend(); ++it)
+        if (value(it.key()) != it.value())
+            setValue(it.key(), it.value());
+    save();
+    emit allValuesChanged();
+}
+
+QVariantList RedesignSettings::subtitleCues(const QString &url) const
+{
+    const QUrl source(url);
+    if (!source.isLocalFile())
+        return {};
+    QFile file(source.toLocalFile());
+    if (!file.open(QIODevice::ReadOnly) || file.size() > 8 * 1024 * 1024)
+        return {};
+    QString text = QString::fromUtf8(file.readAll());
+    text.replace(QStringLiteral("\r"), QString());
+    // SRT and WebVTT timestamps, with optional cue identifiers/settings.
+    const QRegularExpression stamp(QStringLiteral(
+        "(?:(\\d+):)?(\\d{2}):(\\d{2})[,.](\\d{3})"));
+    QVariantList result;
+    const auto blocks = text.split(QStringLiteral("\n\n"), Qt::SkipEmptyParts);
+    for (const auto &block : blocks)
+    {
+        const auto lines = block.split('\n');
+        for (int i = 0; i < lines.size(); ++i)
+        {
+            if (!lines[i].contains(QStringLiteral("-->")))
+                continue;
+            auto matches = stamp.globalMatch(lines[i]);
+            if (!matches.hasNext()) break;
+            const auto start = matches.next();
+            if (!matches.hasNext()) break;
+            const auto end = matches.next();
+            auto ms = [](const QRegularExpressionMatch &m) {
+                return ((m.captured(1).toLongLong() * 60 + m.captured(2).toInt()) * 60
+                        + m.captured(3).toInt()) * 1000 + m.captured(4).toInt();
+            };
+            if (ms(end) <= ms(start)) break;
+            result.append(QVariantMap{{"start", ms(start)}, {"end", ms(end)},
+                                      {"text", lines.mid(i + 1).join('\n')}});
+            break;
+        }
+    }
+    return result;
+}
+
+bool RedesignSettings::writePlaylist(const QString &path, const QStringList &urls) const
+{
+    QSaveFile file(path);
+    if (!file.open(QIODevice::WriteOnly)) return false;
+    QByteArray data("#EXTM3U\n");
+    for (const auto &url : urls) {
+        if (url.contains('\n') || url.contains('\r')) return false;
+        data += QUrl(url).toEncoded() + '\n';
+    }
+    return file.write(data) == data.size() && file.commit();
 }

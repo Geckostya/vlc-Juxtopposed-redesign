@@ -119,7 +119,7 @@ Rectangle {
                 visible: root.libraryAvailable && root.locationName.length > 0
                 hoverEnabled: true
                 implicitHeight: Theme.dp(28)
-                implicitWidth: locationRow.implicitWidth + Theme.dp(8)
+                implicitWidth: Math.min(locationRow.implicitWidth + Theme.dp(8), root.width * 0.26)
                 onClicked: root.locationClicked()
 
                 background: Rectangle {
@@ -132,7 +132,7 @@ Rectangle {
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: Theme.dp(4)
                         RIcon { name: "folder"; anchors.verticalCenter: parent.verticalCenter }
-                        RText { text: root.locationName; anchors.verticalCenter: parent.verticalCenter }
+                        RText { text: root.locationName; width: Math.max(0, locationBtn.width - Theme.dp(32)); anchors.verticalCenter: parent.verticalCenter }
                     }
                 }
             }
@@ -141,7 +141,7 @@ Rectangle {
         RText {
             id: title
             anchors.centerIn: parent
-            width: Math.min(implicitWidth, parent.width - 2 * Math.max(leftGroup.width, rightGroup.width) - Theme.dp(24))
+            width: Math.max(0, Math.min(implicitWidth, parent.width - 2 * Math.max(leftGroup.width, rightGroup.width) - Theme.dp(24)))
             horizontalAlignment: Text.AlignHCenter
             text: {
                 if (Player.isStarted && Player.title.length > 0)
@@ -157,6 +157,16 @@ Rectangle {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             spacing: 0
+
+            Repeater {
+                model: RBarCatalog.topExtras
+                delegate: RBarItem {
+                    required property string modelData
+                    itemId: modelData
+                    Layout.preferredWidth: implicitWidth
+                    Layout.preferredHeight: implicitHeight
+                }
+            }
 
             Repeater {
                 model: root.showWindowButtons ? MainCtx.csdButtonModel.windowCSDButtons : []

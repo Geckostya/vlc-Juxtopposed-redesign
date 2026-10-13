@@ -30,20 +30,65 @@ Item {
     // route: { page: "home" | "videos" | "music" | "network" | "playlists" | "recent",
     //          title, params: {...}, crumbs: [route, ...] (parents, for the breadcrumb) }
     property var route: ({ page: "home", title: qsTr("Home"), params: ({}), crumbs: [] })
+    property var pinnedRoutes: {
+        try { return JSON.parse(String(MainCtx.settingValue("Redesign/pinnedRoutes", "[]"))) }
+        catch (e) { return [] }
+    }
+    function pinCurrent() {
+        if (route.params.tree !== undefined) return
+        let params = {}
+        for (const k in route.params) {
+            const value = route.params[k]
+            params[k] = (k === "id" || k === "folderId") ? value.toString() : value
+        }
+        const saved = { page: route.page, title: route.title, params: params, crumbs: [] }
+        if (!pinnedRoutes.some(r => JSON.stringify(r) === JSON.stringify(saved))) {
+            pinnedRoutes = pinnedRoutes.concat([saved])
+            MainCtx.setSettingValue("Redesign/pinnedRoutes", JSON.stringify(pinnedRoutes))
+        }
+    }
+    function unpin(index) {
+        pinnedRoutes = pinnedRoutes.filter((r, i) => i !== index)
+        MainCtx.setSettingValue("Redesign/pinnedRoutes", JSON.stringify(pinnedRoutes))
+    }
     property var backStack: []
     property var forwardStack: []
 
     // header state shared with the page
-    property bool grid: true
+    property bool grid: MainCtx.gridView
+    onGridChanged: MainCtx.gridView = grid
+    Connections { target: MainCtx; function onGridViewChanged() { root.grid = MainCtx.gridView } }
     property string searchPattern: ""
     property string sortCriteria: ""
     property int sortOrder: Qt.AscendingOrder
     property int itemCount: 0
+    property var sortKeys: [{ key: "title", text: qsTr("Title") }]
+    readonly property var sortOptions: {
+        let options = [{ key: "", text: qsTr("Default order"), order: Qt.AscendingOrder }]
+        for (const it of sortKeys) {
+            let asc = it.text + " A–Z", desc = it.text + " Z–A"
+            if (it.key === "playcount") { asc = qsTr("Unwatched first"); desc = qsTr("Watched first") }
+            else if (it.key === "insertion") { asc = qsTr("Oldest first"); desc = qsTr("Newest first") }
+            else if (["duration", "track_number"].indexOf(it.key) >= 0) {
+                asc = it.text + " ↑"; desc = it.text + " ↓"
+            }
+            options.push({ key: it.key, text: asc, order: Qt.AscendingOrder })
+            options.push({ key: it.key, text: desc, order: Qt.DescendingOrder })
+        }
+        return options
+    }
+    function resetSort() { sortCriteria = ""; sortOrder = Qt.AscendingOrder }
+    onRouteChanged: resetSort()
 
     // area where RMainInterface shows the playing media while browsing
-    readonly property rect miniPlayerRect: Qt.rect(width - Theme.dp(396), height - Theme.dp(344),
-                                                   Theme.dp(380), Theme.dp(214))
+    readonly property real miniWidth: Math.min(Theme.dp(380), Math.max(Theme.dp(180), width * 0.32))
+    readonly property rect miniPlayerRect: Qt.rect(Math.max(Theme.dp(8), width - miniWidth - Theme.dp(16)),
+                                                  Math.max(Theme.topBarHeight, height - miniWidth * 9 / 16 - Theme.dp(138)),
+                                                  miniWidth, miniWidth * 9 / 16)
 
+    property bool compact: false
+    property bool standalone: false
+    signal expandLibrary()
     signal backToPlayer()
 
     function navigate(r) {
@@ -89,6 +134,8 @@ Item {
     RTopBar {
         id: topBar
         width: parent.width
+        visible: !root.compact && !root.standalone
+        height: visible ? implicitHeight : 0
         libraryAvailable: Player.isStarted
         sidebarOpen: true
         onSidebarToggled: root.backToPlayer()
@@ -100,9 +147,13 @@ Item {
         id: sidebar
         x: Theme.dp(8)
         y: topBar.height + Theme.dp(8)
-        width: Theme.dp(200)
+        width: root.compact ? Theme.dp(56) : Theme.dp(200)
+        compact: root.compact
         height: parent.height - y - Theme.dp(8)
         currentPage: root.route.page
+        pinnedRoutes: root.pinnedRoutes
+        onPinnedRequested: (index) => root.navigate(root.pinnedRoutes[index])
+        onUnpinRequested: (index) => root.unpin(index)
         onPageRequested: (page) => root.openPage(page)
         onAddRequested: addFolder.trigger()
     }
@@ -110,9 +161,9 @@ Item {
     Item {
         id: main
         anchors.left: sidebar.right
-        anchors.leftMargin: Theme.dp(28)
+        anchors.leftMargin: root.compact ? Theme.dp(12) : Theme.dp(28)
         anchors.right: parent.right
-        anchors.rightMargin: Theme.dp(24)
+        anchors.rightMargin: root.compact ? Theme.dp(12) : Theme.dp(24)
         anchors.top: topBar.bottom
         anchors.bottom: parent.bottom
 
@@ -147,7 +198,10 @@ Item {
                 default: return "RLibHomePage.qml"
                 }
             }
-            onLoaded: item.library = root
+            onLoaded: {
+                root.sortKeys = [{ key: "title", text: qsTr("Title") }]
+                item.library = root
+            }
         }
 
         RText {

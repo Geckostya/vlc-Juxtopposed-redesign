@@ -236,6 +236,34 @@ void RedesignEffects::setAudioValue(const QString &name, const QVariant &value)
     emit changed();
 }
 
+bool RedesignEffects::hasAssociatedMedia(const QString &url) const
+{
+    input_item_t *item = THEMIM->getInput();
+    if (!item) return false;
+    const QUrl wanted(url);
+    bool found = false;
+    vlc_mutex_lock(&item->lock);
+    for (int i = 0; i < item->i_slaves; ++i) {
+        if (QUrl(qfu(item->pp_slaves[i]->psz_uri)).matches(wanted, QUrl::NormalizePathSegments)) {
+            found = true;
+            break;
+        }
+    }
+    vlc_mutex_unlock(&item->lock);
+    return found;
+}
+
+bool RedesignEffects::associateSubtitleFile(const QString &url)
+{
+    return hasAssociatedMedia(url) || THEMIM->associateSubtitleFile(url);
+}
+
+bool RedesignEffects::associateAudioFile(const QString &url)
+{
+    if (hasAssociatedMedia(url)) return true;
+    return THEMIM->AddAssociatedMedia(AUDIO_ES, url, true, true, true) == VLC_SUCCESS;
+}
+
 void RedesignEffects::enqueueWithSubtitles(const QVariantList &pairs, bool play)
 {
     QVector<vlc::playlist::Media> medias;
@@ -244,9 +272,12 @@ void RedesignEffects::enqueueWithSubtitles(const QVariantList &pairs, bool play)
         const QVariantMap m = v.toMap();
         const QUrl video(m.value("video").toString());
         const QUrl sub(m.value("subtitle").toString());
+        const QUrl audio(m.value("audio").toString());
         QStringList options;
         if (sub.isLocalFile())
             options.append(QStringLiteral(":sub-file=") + QDir::toNativeSeparators(sub.toLocalFile()));
+        if (audio.isLocalFile())
+            options.append(QStringLiteral(":input-slave=") + audio.toString(QUrl::FullyEncoded));
         medias.append(vlc::playlist::Media(video.toString(QUrl::FullyEncoded), video.fileName(), options));
     }
     if (!medias.isEmpty())

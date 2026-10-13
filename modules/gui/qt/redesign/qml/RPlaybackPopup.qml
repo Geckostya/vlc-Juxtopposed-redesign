@@ -37,12 +37,18 @@ Rectangle {
 
     MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons; onWheel: (w) => w.accepted = true }
 
+    Flickable {
+        anchors.fill: parent
+        contentHeight: col.implicitHeight
+        clip: true
+        T.ScrollBar.vertical: RScrollBar { }
     ColumnLayout {
         id: col
         anchors.left: parent.left
         anchors.right: parent.right
         spacing: 0
 
+        RPresetPicker { Layout.fillWidth: true; Layout.margins: Theme.dp(12) }
         RSectionHeader {
             Layout.fillWidth: true
             text: qsTr("Speed")
@@ -86,6 +92,22 @@ Rectangle {
             value: Player.audioDelayMS
             onMoved: Player.audioDelayMS = value
             onReset: Player.audioDelayMS = 0
+        }
+
+        RSectionHeader {
+            Layout.fillWidth: true
+            text: qsTr("Sleep timer")
+            RText { text: RWindows.sleepDeadline > 0 ? qsTr("%1 min remaining").arg(Math.ceil(RWindows.sleepRemaining / 60)) : qsTr("Off") }
+        }
+        RDropdown {
+            Layout.fillWidth: true
+            Layout.leftMargin: Theme.margin
+            Layout.rightMargin: Theme.margin
+            model: [{ value: 0, text: qsTr("Off") }, { value: 15, text: qsTr("15 minutes") },
+                    { value: 30, text: qsTr("30 minutes") }, { value: 60, text: qsTr("1 hour") },
+                    { value: 90, text: qsTr("90 minutes") }, { value: 120, text: qsTr("2 hours") }]
+            Component.onCompleted: selectValue(RWindows.sleepMinutes)
+            onPicked: (minutes) => RWindows.setSleepTimer(Number(minutes))
         }
 
         RSectionHeader { Layout.fillWidth: true; text: qsTr("Tools") }
@@ -136,5 +158,6 @@ Rectangle {
                 onClicked: { root.closeRequested(); RWindows.effectsRequested(0) }
             }
         }
+    }
     }
 }

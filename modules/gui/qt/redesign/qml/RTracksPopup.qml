@@ -37,6 +37,12 @@ Rectangle {
     signal closeRequested()
 
     onVisibleChanged: if (!visible) effects = false
+    Connections {
+        target: RPresets
+        function onApplied() {
+            if (root.effects) { root.effects = false; Qt.callLater(() => root.effects = true) }
+        }
+    }
 
     implicitWidth: Theme.popupWidth
     implicitHeight: effects ? Theme.dp(640) : Theme.dp(524)
@@ -50,6 +56,11 @@ Rectangle {
     ColumnLayout {
         anchors.fill: parent
         spacing: 1
+
+        RPresetPicker {
+            Layout.fillWidth: true
+            Layout.margins: Theme.dp(12)
+        }
 
         RTabBar {
             id: tabs
@@ -108,7 +119,7 @@ Rectangle {
                     RIconButton {
                         iconName: "edit"
                         toolTip: qsTr("Synchronization")
-                        onClicked: DialogsProvider.synchroDialog()
+                        onClicked: RWindows.subtitleTimelineRequested()
                     }
                     RIconButton {
                         iconName: "add"

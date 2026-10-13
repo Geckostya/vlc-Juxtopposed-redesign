@@ -25,6 +25,7 @@ RSettingRow {
     id: root
 
     property string list: "extraintf"
+    visible: RedesignSettings.moduleAvailable(module)
     property string module
 
     function modules() {

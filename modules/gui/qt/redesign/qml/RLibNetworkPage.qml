@@ -68,6 +68,12 @@ Item {
             width: parent.width
             spacing: Theme.dp(12)
 
+            Loader {
+                width: parent.width
+                active: MainCtx.mediaLibraryAvailable
+                source: "RLibStreams.qml"
+                onLoaded: item.library = root.library
+            }
             Repeater {
                 model: [{ title: qsTr("This Computer"), model: computer, icon: "folder" },
                         { title: qsTr("Devices"), model: devices, icon: "disc" },
@@ -104,6 +110,7 @@ Item {
         fallbackIcon: "file"
         model: media
         currentMrl: Player.isStarted ? String(Player.url) : ""
+        onEnqueueRequested: (index, item) => media.addToPlaylist(index)
         onActivated: (index, item) => root.open(media, index, item)
     }
 

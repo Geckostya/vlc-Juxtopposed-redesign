@@ -145,9 +145,12 @@ Rectangle {
 
                     DropArea {
                         anchors.fill: parent
-                        keys: ["text/uri-list"]
+                        keys: ["text/uri-list", "vlc-redesign-media"]
                         onDropped: (drop) => {
-                            if (drop.hasUrls) {
+                            if (drop.source && drop.source.enqueueForDrop) {
+                                drop.source.enqueueForDrop()
+                                drop.accept()
+                            } else if (drop.hasUrls) {
                                 let urls = []
                                 for (let i = 0; i < drop.urls.length; ++i)
                                     urls.push(drop.urls[i])

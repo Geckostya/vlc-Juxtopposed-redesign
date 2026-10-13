@@ -25,6 +25,7 @@ import VLC.MediaLibrary
 RMenu {
     id: root
 
+    iconName: "recent"
     title: qsTr("Open Recent")
 
     property MLRecentMediaModel recents: MLRecentMediaModel { ml: MediaLib; limit: 10 }

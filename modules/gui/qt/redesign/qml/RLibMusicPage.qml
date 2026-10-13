@@ -27,7 +27,10 @@ Item {
     id: root
 
     property var library
-    readonly property var params: library ? library.route.params : ({})
+    readonly property var params: {
+        const p = library ? library.route.params : ({})
+        return typeof p.id === "string" ? Object.assign({}, p, { id: MediaLib.deserializeMlItemIdFromString(p.id) }) : p
+    }
     // "albums", "artists", "tracks", "genres", "album" (tracks of params.id),
     // "artist" (albums of params.id), "genre" (tracks of params.id)
     readonly property string mode: params.mode || tabs.currentValue || "albums"
@@ -37,6 +40,12 @@ Item {
     readonly property int order: library ? library.sortOrder : Qt.AscendingOrder
 
     Binding { target: root.library; property: "itemCount"; value: view.count; when: !!root.library }
+
+    onModeChanged: if (library) library.resetSort()
+    Binding { target: root.library; property: "sortKeys"; when: !!root.library
+        value: ["tracks", "album", "genre"].indexOf(root.mode) >= 0
+            ? [{ key: "title", text: qsTr("Title") }, { key: "main_artist", text: qsTr("Artist") }, { key: "album_title", text: qsTr("Album") }, { key: "track_number", text: qsTr("Track number") }, { key: "insertion", text: qsTr("Date added") }, { key: "duration", text: qsTr("Duration") }]
+            : [{ key: "title", text: qsTr("Title") }] }
 
     MLAlbumModel { id: albums; ml: MediaLib; searchPattern: root.search; sortCriteria: root.sortBy; sortOrder: root.order
                    parentId: root.mode === "artist" ? root.params.id : MediaLib.deserializeMlItemIdFromString("") }
@@ -85,6 +94,7 @@ Item {
             }
         }
 
+        onEnqueueRequested: (index, item) => MediaLib.addToPlaylist(item.id)
         onActivated: (index, item) => {
             switch (root.mode) {
             case "albums": case "artist":

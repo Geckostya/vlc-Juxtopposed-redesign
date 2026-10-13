@@ -19,6 +19,7 @@ import QtQuick
 import QtQuick.Templates as T
 
 import VLC.MainInterface
+import VLC.Player
 
 // Audio effects of the tracks popup (Figma "Audio - Equalizer", "Audio - Compressor
 // Settings", "Audio - Spatializer Settings", "Audio - Stereo Widener", "EQ presets"):
@@ -80,11 +81,11 @@ Flickable {
                     const s = String(RedesignEffects.audioValue("equalizer-bands") || "").trim()
                     const b = s.length > 0 ? s.split(/\s+/).map(Number) : []
                     while (b.length < 10) b.push(0)
-                    bands = b.slice(0, 10)
+                    bands.bands = b.slice(0, 10)
                 }
                 onPreampEdited: (v) => { preamp = v; RedesignEffects.setAudioValue("equalizer-preamp", v) }
                 onBandsEdited: (b) => {
-                    bands = b
+                    bands.bands = b
                     presets.currentIndex = 0
                     RedesignEffects.setAudioValue("equalizer-bands", b.map(x => x.toFixed(1)).join(" "))
                 }
@@ -140,6 +141,11 @@ Flickable {
             onToggled: (on) => { RedesignEffects.setAudioFilterEnabled("scaletempo_pitch", on); checked = on }
 
             REffectSlider { audio: true; label: qsTr("Pitch shift"); option: "pitch-shift"; from: -12; to: 12; decimals: 1; unit: qsTr("semitones"); tickCount: 24 }
+        }
+
+        RCollapsible {
+            title: qsTr("Audio visualizer")
+            RTrackList { width: parent.width; height: Theme.dp(210); model: Player.audioVisualization }
         }
 
         RCollapsible {

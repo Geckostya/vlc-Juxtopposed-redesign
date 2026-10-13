@@ -47,6 +47,7 @@ RMenu {
 
     RMenuSeparator { }
 
+    RAction { iconName: "fullscreen"; text: qsTr("Mini player"); enabled: Player.isStarted; onTriggered: RWindows.miniPlayerRequested() }
     RAction { iconName: "hotkeys_2t";  text: qsTr("Keyboard Shortcuts");    onTriggered: RWindows.shortcutsRequested() }
     RAction { iconName: "paint_2t";    text: qsTr("Customize Player");      onTriggered: RWindows.customizeRequested() }
     RAction { iconName: "settings_2t"; text: qsTr("Settings");              shortcutText: "Ctrl + P"; onTriggered: DialogsProvider.prefsDialog() }

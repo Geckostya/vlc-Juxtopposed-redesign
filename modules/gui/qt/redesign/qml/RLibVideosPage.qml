@@ -28,18 +28,24 @@ Item {
 
     property var library
     readonly property var params: library ? library.route.params : ({})
+    readonly property var folderId: typeof params.folderId === "string" ? MediaLib.deserializeMlItemIdFromString(params.folderId) : params.folderId
     readonly property bool inFolder: params.folderId !== undefined || params.all === true
 
     Binding {
         target: root.library
         property: "itemCount"
-        value: root.inFolder ? videos.count : folders.count + 1
+        value: root.inFolder ? videos.count + (root.params.all ? 0 : folders.count) : folders.count + 1
         when: !!root.library
     }
+
+    Binding { target: root.library; property: "sortKeys"; when: !!root.library
+        value: root.inFolder ? [{ key: "playcount", text: qsTr("Watched") }, { key: "insertion", text: qsTr("Date added") }, { key: "title", text: qsTr("Title") }, { key: "duration", text: qsTr("Duration") }] : [{ key: "title", text: qsTr("Title") }] }
 
     MLVideoFoldersModel {
         id: folders
         ml: MediaLib
+        hierarchical: true
+        parentId: root.params.folderId !== undefined ? root.folderId : MediaLib.deserializeMlItemIdFromString("")
         searchPattern: root.library ? root.library.searchPattern : ""
         sortCriteria: root.library && root.library.sortCriteria.length > 0 ? root.library.sortCriteria : "title"
         sortOrder: root.library ? root.library.sortOrder : Qt.AscendingOrder
@@ -48,7 +54,7 @@ Item {
     MLVideoModel {
         id: videos
         ml: MediaLib
-        parentId: root.params.folderId !== undefined ? root.params.folderId : MediaLib.deserializeMlItemIdFromString("")
+        parentId: root.params.folderId !== undefined ? root.folderId : MediaLib.deserializeMlItemIdFromString("")
         searchPattern: root.library ? root.library.searchPattern : ""
         sortCriteria: root.library && root.library.sortCriteria.length > 0 ? root.library.sortCriteria : "title"
         sortOrder: root.library ? root.library.sortOrder : Qt.AscendingOrder
@@ -74,18 +80,33 @@ Item {
             }
         }
 
+        onEnqueueRequested: (index, item) => MediaLib.addToPlaylist(item.id)
         onActivated: (index, item) => root.library.openChild(item.title, { folderId: item.id })
         onContextMenuRequested: (index, item, pos) => menu.openFor(item, pos, true)
     }
 
-    // ---- videos of a folder
+    // ---- videos of a folder, with its real subfolders above the media
     RMediaView {
+        id: videoView
+        header: RMediaView {
+            width: videoView.width
+            height: root.params.all ? 0 : Math.ceil(count / columns) * cellHeight
+            visible: !root.params.all && count > 0
+            interactive: false
+            grid: videoView.grid
+            fallbackIcon: "folder"
+            model: folders
+            onActivated: (index, item) => root.library.openChild(item.title, { folderId: item.id })
+            onEnqueueRequested: (index, item) => MediaLib.addToPlaylist(item.id)
+            onContextMenuRequested: (index, item, pos) => menu.openFor(item, pos, true)
+        }
         anchors.fill: parent
         visible: root.inFolder
         grid: root.library ? root.library.grid : true
         model: videos
         currentMrl: Player.isStarted ? String(Player.url) : ""
 
+        onEnqueueRequested: (index, item) => MediaLib.addToPlaylist(item.id)
         onActivated: (index, item) => MediaLib.addAndPlay(item.id)
         onContextMenuRequested: (index, item, pos) => menu.openFor(item, pos, false, () => videos.setItemPlayed(videos.index(index, 0), !(item.progress > 0 || item.playcount > 0)))
     }

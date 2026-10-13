@@ -18,19 +18,30 @@
 import QtQuick
 
 import VLC.MediaLibrary
+import VLC.MainInterface
+import VLC.Dialogs
+import VLC.Playlist
 
 // Right click menu of library items (Figma "file context menu", "folder context menu").
 RMenu {
     id: root
 
+    property int itemIndex: -1
     property var item
     property bool isFolder: false
+    property bool favorite: false
+    property var urls: []
     property var togglePlayed: null      // function, for videos
 
     function openFor(it, globalPos, folder, played) {
         item = it
         isFolder = folder === true
         togglePlayed = played || null
+        favorite = false
+        urls = []
+        const id = it.id.toString()
+        MediaLib.isFavorite(it.id, value => { if (root.item && root.item.id.toString() === id) root.favorite = value })
+        MediaLib.mediaUrls(it.id, value => { if (root.item && root.item.id.toString() === id) root.urls = value })
         const p = parent ? parent.mapFromGlobal(globalPos.x, globalPos.y) : globalPos
         popup(p.x, p.y)
     }
@@ -51,4 +62,33 @@ RMenu {
         enabled: root.togglePlayed !== null
         onTriggered: root.togglePlayed()
     }
+
+    RAction {
+        text: root.favorite ? qsTr("Remove from favorites") : qsTr("Favorite")
+        iconName: "favorite"
+        checkable: true; checked: root.favorite
+        onTriggered: { root.favorite = !root.favorite; MediaLib.setFavorite(root.item.id, root.favorite) }
+    }
+    RAction { text: qsTr("Shuffle"); iconName: "shuffle"; enabled: root.isFolder; onTriggered: { MainPlaylistController.random = true; MediaLib.addAndPlay(root.item.id) } }
+    RAction { text: qsTr("Add to playlist"); iconName: "playlist_2t"; onTriggered: RWindows.addToPlaylistRequested([root.item.id]) }
+    RMenuSeparator { }
+    RAction { text: qsTr("Stream"); iconName: "streaming_2t"; enabled: root.urls.length > 0; onTriggered: DialogsProvider.streamingDialog(root.urls, false) }
+    RAction { text: qsTr("Convert"); iconName: "swap_2t"; enabled: root.urls.length > 0; onTriggered: DialogsProvider.streamingDialog(root.urls, true) }
+    RAction {
+        text: qsTr("Export playlist"); iconName: "playlist_2t"; enabled: root.urls.length > 0
+        onTriggered: {
+            const path = RedesignSettings.browseFile("playlist.m3u8", true)
+            if (path.length && !RedesignSettings.writePlaylist(path, root.urls))
+                DialogsProvider.messageDialog(qsTr("The playlist could not be saved."))
+        }
+    }
+    RMenuSeparator { }
+    RAction {
+        text: qsTr("Show in File Explorer"); iconName: "folder_2t"
+        enabled: String(root.item && (root.item.mrl || root.item.url) || "").startsWith("file:")
+        onTriggered: Qt.openUrlExternally(RedesignSettings.directoryOf(String(root.item.mrl || root.item.url)))
+    }
+    RAction { text: qsTr("Add subtitle tracks"); iconName: "subtitles_2t"; enabled: root.urls.length > 0; onTriggered: RWindows.addSubtitlesToMediaRequested(root.urls) }
+    RAction { text: qsTr("Add audio tracks"); iconName: "audio_2t"; enabled: root.urls.length > 0; onTriggered: RWindows.addAudioToMediaRequested(root.urls) }
+    RAction { text: qsTr("Properties & metadata"); iconName: "info_2t"; enabled: !root.isFolder; onTriggered: DialogsProvider.mediaInfoDialog(root.item.id) }
 }

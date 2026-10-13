@@ -26,6 +26,8 @@ import VLC.MainInterface
 Column {
     id: root
 
+    readonly property bool advancedOptionGroup: true
+
     property var subcats: []          // vlc_config_subcat values
     property var exclude: []          // option names already shown on the page (default: the
                                       // ROption rows of the enclosing RSettingsPage)

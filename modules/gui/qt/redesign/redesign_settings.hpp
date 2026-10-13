@@ -58,6 +58,11 @@ public:
     /// options whose name, label or description contain text: [{ name, text, subcat }]
     Q_INVOKABLE QVariantList search(const QString &text, int max = 50) const;
 
+    Q_INVOKABLE bool writePlaylist(const QString &path, const QStringList &urls) const;
+    Q_INVOKABLE bool moduleAvailable(const QString &name) const;
+    Q_INVOKABLE QVariantMap snapshot() const;
+    Q_INVOKABLE void restore(const QVariantMap &values);
+    Q_INVOKABLE QVariantList subtitleCues(const QString &url) const;
     Q_INVOKABLE void save();
     Q_INVOKABLE void resetAll();
     /// restores the default of every hotkey option ("key-*", "global-key-*")

@@ -27,9 +27,22 @@ RDialogWindow {
     id: root
 
     property var working: []
+    property var bottomWorking: []
+    property var topWorking: []
+    property bool editingTop: false
+
+    function switchBar(top) {
+        if (editingTop) topWorking = working.slice()
+        else bottomWorking = working.slice()
+        editingTop = top
+        working = (top ? topWorking : bottomWorking).slice()
+    }
 
     function open() {
-        working = RBarCatalog.extras.slice()
+        bottomWorking = RBarCatalog.extras.slice()
+        topWorking = RBarCatalog.topExtras.slice()
+        editingTop = false
+        working = bottomWorking.slice()
         show()
         raise()
         requestActivate()
@@ -63,12 +76,17 @@ RDialogWindow {
     }
 
     heading: qsTr("Customize Player")
-    acceptEnabled: JSON.stringify(working) !== JSON.stringify(RBarCatalog.extras)
+    acceptEnabled: true
     width: Theme.dp(1048)
     height: Theme.dp(760)
     minimumWidth: Theme.dp(700)
     minimumHeight: Theme.dp(560)
-    onAccepted: RBarCatalog.setExtras(working)
+    onAccepted: {
+        if (editingTop) topWorking = working.slice()
+        else bottomWorking = working.slice()
+        RBarCatalog.setExtras(bottomWorking)
+        RBarCatalog.setTopExtras(topWorking)
+    }
 
     component Tile: Item {
         id: tile
@@ -159,7 +177,7 @@ RDialogWindow {
             id: catalog
             anchors.top: hint.bottom
             anchors.topMargin: Theme.dp(16)
-            anchors.bottom: stripTitle.top
+            anchors.bottom: barSelector.top
             anchors.bottomMargin: Theme.dp(16)
             width: parent.width
             radius: Theme.radius
@@ -181,6 +199,7 @@ RDialogWindow {
                 anchors.margins: Theme.dp(12)
                 clip: true
                 contentHeight: flow.height
+                T.ScrollBar.vertical: RScrollBar { }
                 Flow {
                     id: flow
                     width: parent.width
@@ -195,11 +214,22 @@ RDialogWindow {
             }
         }
 
+        RSegmented {
+            id: barSelector
+            anchors.bottom: stripTitle.top
+            anchors.bottomMargin: Theme.dp(12)
+            width: Theme.dp(360)
+            height: Theme.dp(34)
+            model: [{ value: "bottom", text: qsTr("Control bar") }, { value: "top", text: qsTr("Top bar") }]
+            currentValue: root.editingTop ? "top" : "bottom"
+            onPicked: (v) => root.switchBar(v === "top")
+        }
+
         RText {
             id: stripTitle
             anchors.bottom: strip.top
             anchors.bottomMargin: Theme.dp(8)
-            text: qsTr("Control bar (between the volume and the audio button)")
+            text: root.editingTop ? qsTr("Top bar (before the window controls)") : qsTr("Control bar (between the volume and the audio button)")
             color: Theme.textDim
         }
 
@@ -234,6 +264,13 @@ RDialogWindow {
                 color: Theme.textDim
             }
 
+            Flickable {
+                anchors.fill: parent
+                clip: true
+                contentWidth: stripRow.width + Theme.dp(20)
+                contentHeight: height
+                flickableDirection: Flickable.HorizontalFlick
+                T.ScrollBar.horizontal: RScrollBar { }
             Row {
                 id: stripRow
                 x: Theme.dp(10)
@@ -248,6 +285,8 @@ RDialogWindow {
                     }
                 }
             }
+        }
+
         }
 
         // dragged tiles are reparented here so they float above everything

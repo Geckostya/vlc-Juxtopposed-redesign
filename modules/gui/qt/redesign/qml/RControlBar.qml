@@ -30,6 +30,7 @@ Rectangle {
 
     // which side panel / popup is currently open ("", "audio", "subtitles", "playback", "queue")
     property string openPanel: ""
+    readonly property bool narrow: width < Theme.dp(720)
     signal panelRequested(string name)
 
     implicitHeight: Theme.controlBarHeight
@@ -46,13 +47,14 @@ Rectangle {
         anchors.fill: parent
         anchors.leftMargin: Theme.margin
         anchors.rightMargin: Theme.margin
-        spacing: Theme.margin
+        spacing: root.narrow ? Theme.dp(6) : Theme.margin
 
         // --- transport -----------------------------------------------------
         RowLayout {
             spacing: Theme.spacing
 
             RIconButton {
+                visible: !root.narrow
                 iconName: "previous"
                 toolTip: qsTr("Previous")
                 enabled: MainPlaylistController.hasPrev || Player.isStarted
@@ -90,6 +92,7 @@ Rectangle {
             }
 
             RIconButton {
+                visible: !root.narrow
                 iconName: "next"
                 toolTip: qsTr("Next")
                 enabled: MainPlaylistController.hasNext
@@ -109,9 +112,11 @@ Rectangle {
             RSeekBar {
                 id: seekBar
                 Layout.fillWidth: true
+                Layout.minimumWidth: Theme.dp(40)
             }
 
             RTimeLabel {
+                visible: !root.narrow
                 clickable: true
                 text: {
                     if (!Player.isStarted || !Player.length.valid())
@@ -134,7 +139,7 @@ Rectangle {
                 onClicked: Player.toggleMuted()
             }
 
-            RVolumeCone { }
+            RVolumeCone { visible: !root.narrow }
         }
 
         // --- controls placed with "Customize Player" ------------------------
@@ -152,7 +157,7 @@ Rectangle {
 
         // --- tracks / settings --------------------------------------------
         RowLayout {
-            spacing: Theme.dp(12)
+            spacing: root.narrow ? Theme.dp(4) : Theme.dp(12)
 
             RIconButton {
                 iconName: root.openPanel === "audio" ? "audio_active" : "audio"

@@ -72,8 +72,20 @@ QtObject {
         }
     }
 
+    property var topExtras: {
+        try {
+            const v = JSON.parse(String(MainCtx.settingValue("Redesign/topbarExtras", "[]")))
+            return Array.isArray(v) ? v.filter(id => root.item(id) !== null) : []
+        } catch (e) { return [] }
+    }
+
+    function setTopExtras(list) {
+        topExtras = list.filter(id => root.item(id) !== null)
+        MainCtx.setSettingValue("Redesign/topbarExtras", JSON.stringify(topExtras))
+    }
+
     function setExtras(list) {
-        extras = list
+        extras = list.filter(id => root.item(id) !== null)
         MainCtx.setSettingValue("Redesign/controlbarExtras", JSON.stringify(list))
     }
 }

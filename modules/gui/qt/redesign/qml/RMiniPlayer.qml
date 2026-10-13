@@ -31,6 +31,7 @@ Rectangle {
     property rect videoRect
     signal expandRequested()
     signal queueRequested()
+    signal libraryRequested()
 
     x: videoRect.x - Theme.dp(8)
     y: videoRect.y - Theme.dp(8)
@@ -114,6 +115,12 @@ Rectangle {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: Theme.dp(4)
+                RIconButton {
+                    iconName: "folder"
+                    iconSize: Theme.iconSizeSmall
+                    toolTip: qsTr("Open library")
+                    onClicked: root.libraryRequested()
+                }
                 RIconButton {
                     iconName: "fullscreen"
                     iconSize: Theme.iconSizeSmall

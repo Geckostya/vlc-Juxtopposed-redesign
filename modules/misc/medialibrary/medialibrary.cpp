@@ -1322,7 +1322,7 @@ int MediaLibrary::List( int listQuery, const vlc_ml_query_params_t* params, va_l
             if ( query == nullptr )
                 return VLC_EGENERIC;
             auto* res =
-                ml_convert_list<vlc_ml_folder_list_t, vlc_ml_folder_t>( query->all() );
+                ml_convert_list<vlc_ml_folder_list_t, vlc_ml_folder_t>( query->items(nbItems, offset) );
             *( va_arg( args, vlc_ml_folder_list_t** ) ) = res;
             break;
         }
@@ -1578,10 +1578,10 @@ int MediaLibrary::List( int listQuery, const vlc_ml_query_params_t* params, va_l
             const auto parent = m_ml->folder( va_arg( args, int64_t ) );
             if ( parent == nullptr )
                 return VLC_EGENERIC;
-            const auto query = parent->subfolders();
+            const auto query = parent->subfolders(paramsPtr);
             if ( query == nullptr )
                 return VLC_EGENERIC;
-            auto* res = ml_convert_list<vlc_ml_folder_list_t, vlc_ml_folder_t>( query->all() );
+            auto* res = ml_convert_list<vlc_ml_folder_list_t, vlc_ml_folder_t>( query->items(nbItems, offset) );
             *( va_arg( args, vlc_ml_folder_list_t** ) ) = res;
             break;
         }
@@ -1590,7 +1590,7 @@ int MediaLibrary::List( int listQuery, const vlc_ml_query_params_t* params, va_l
             const auto parent = m_ml->folder( va_arg( args, int64_t ) );
             if ( parent == nullptr )
                 return VLC_EGENERIC;
-            const auto query = parent->subfolders();
+            const auto query = parent->subfolders(paramsPtr);
             *( va_arg( args, size_t* ) ) = query == nullptr ? 0 : query->count();
             break;
         }

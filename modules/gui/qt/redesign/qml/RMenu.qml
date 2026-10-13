@@ -23,9 +23,10 @@ import QtQuick.Templates as T
 // shortcut on the right). Items are RMenuItem / RMenuSeparator.
 T.Menu {
     id: root
+    property string iconName: ""
 
     implicitWidth: Math.max(Theme.dp(260), contentItem ? contentItem.implicitWidth + leftPadding + rightPadding : 0)
-    implicitHeight: contentItem ? contentItem.implicitHeight + topPadding + bottomPadding : 0
+    implicitHeight: Math.min(contentItem ? contentItem.implicitHeight + topPadding + bottomPadding : 0, Window.window ? Window.window.height - 2 * margins : 10000)
 
     padding: Theme.dp(8)
     margins: Theme.dp(8)

@@ -57,6 +57,9 @@ public:
     Q_INVOKABLE QVariantMap applyEqualizerPreset(const QString &preset);
 
     /// enqueues videos with their subtitle file: [{ video: url, subtitle: url or "" }]
+    Q_INVOKABLE bool hasAssociatedMedia(const QString &url) const;
+    Q_INVOKABLE bool associateSubtitleFile(const QString &url);
+    Q_INVOKABLE bool associateAudioFile(const QString &url);
     Q_INVOKABLE void enqueueWithSubtitles(const QVariantList &pairs, bool play);
 
 signals:

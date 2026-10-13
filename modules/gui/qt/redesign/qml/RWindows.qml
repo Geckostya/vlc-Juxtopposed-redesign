@@ -18,12 +18,35 @@
 pragma Singleton
 
 import QtQuick
+import VLC.Playlist
 
 // Requests for the secondary windows and dialogs of the redesign. Any item can
 // emit them; RMainInterface owns the windows and opens them.
 QtObject {
+    id: root
+    property int sleepMinutes: 0
+    property double sleepDeadline: 0
+    property int sleepRemaining: 0
+    function setSleepTimer(minutes) {
+        sleepMinutes = minutes
+        sleepDeadline = minutes > 0 ? Date.now() + minutes * 60000 : 0
+        sleepRemaining = minutes * 60
+    }
+    property Timer sleepTimer: Timer {
+        interval: 1000
+        repeat: true
+        running: root.sleepDeadline > 0
+        onTriggered: {
+            root.sleepRemaining = Math.max(0, Math.ceil((root.sleepDeadline - Date.now()) / 1000))
+            if (root.sleepRemaining === 0) {
+                root.setSleepTimer(0)
+                MainPlaylistController.stop()
+            }
+        }
+    }
     signal settingsRequested(string category)
     signal shortcutsRequested()
+    signal subtitleTimelineRequested()
     // tab: 0 video effects, 1 audio effects (tracks popup of the player)
     signal effectsRequested(int tab)
     // a panel of the player ("queue", "playback"...) with its tab
@@ -31,8 +54,12 @@ QtObject {
     // the library on a page ("home", "playlists"...)
     signal libraryRequested(string page)
     signal customizeRequested()
+    signal miniPlayerRequested()
     signal networkStreamRequested()
     signal newPlaylistRequested()
+    signal addToPlaylistRequested(var mediaIds)
     // url: a media of the folder to pair with subtitles ("" = ask for the folder)
     signal addSubtitlesRequested(string url)
+    signal addSubtitlesToMediaRequested(var urls)
+    signal addAudioToMediaRequested(var urls)
 }

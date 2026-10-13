@@ -29,6 +29,8 @@ Item {
 
     Binding { target: root.library; property: "itemCount"; value: recent.count; when: !!root.library }
 
+    Binding { target: root.library; property: "sortKeys"; value: []; when: !!root.library }
+
     MLRecentMediaModel {
         id: recent
         ml: MediaLib
@@ -49,6 +51,7 @@ Item {
         grid: root.library ? root.library.grid : true
         model: recent
         currentMrl: Player.isStarted ? String(Player.url) : ""
+        onEnqueueRequested: (index, item) => MediaLib.addToPlaylist(item.id)
         onActivated: (index, item) => MediaLib.addAndPlay(item.id)
         onContextMenuRequested: (index, item, pos) => menu.openFor(item, pos, false)
     }

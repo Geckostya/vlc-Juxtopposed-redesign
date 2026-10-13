@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 import QtQuick
+import QtQml.Models
 import QtQuick.Templates as T
 
 import VLC.MainInterface
@@ -31,6 +32,8 @@ Item {
 
     Row {
         id: nav
+        width: Math.max(0, root.width - tools.width - Theme.dp(12))
+        clip: true
         anchors.verticalCenter: parent.verticalCenter
         spacing: Theme.dp(4)
 
@@ -88,12 +91,14 @@ Item {
     }
 
     Row {
+        id: tools
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         spacing: Theme.dp(12)
 
         RText {
             anchors.verticalCenter: parent.verticalCenter
+            visible: !root.library.compact
             text: qsTr("%n items", "", root.library.itemCount)
             color: Theme.textDim
             font.pixelSize: Theme.fontSizeSmall + Theme.dp(1)
@@ -109,13 +114,14 @@ Item {
 
         RIconButton {
             anchors.verticalCenter: parent.verticalCenter
-            iconName: root.library.grid ? "list" : "grid"
-            toolTip: root.library.grid ? qsTr("List view") : qsTr("Grid view")
-            onClicked: root.library.grid = !root.library.grid
+            iconName: root.library.grid ? "grid" : "list"
+            toolTip: qsTr("View options")
+            onClicked: viewMenu.popup(this, 0, height + Theme.dp(6))
         }
 
         RTextField {
             id: search
+            visible: !root.library.compact
             anchors.verticalCenter: parent.verticalCenter
             width: Math.min(Theme.dp(320), root.width * 0.25)
             height: Theme.dp(34)
@@ -138,6 +144,13 @@ Item {
         }
 
         RIconButton {
+            visible: root.library.compact
+            anchors.verticalCenter: parent.verticalCenter
+            iconName: "fullscreen"
+            toolTip: qsTr("Expand library")
+            onClicked: root.library.expandLibrary()
+        }
+        RIconButton {
             anchors.verticalCenter: parent.verticalCenter
             iconName: "more"
             toolTip: qsTr("More")
@@ -146,21 +159,33 @@ Item {
     }
 
     RMenu {
+        id: viewMenu
+        RAction { iconName: "grid"; text: qsTr("Grid view"); checkable: true; checked: root.library.grid; onTriggered: root.library.grid = true }
+        RAction { iconName: "list"; text: qsTr("List view"); checkable: true; checked: !root.library.grid; onTriggered: root.library.grid = false }
+    }
+
+    RMenu {
         id: sortMenu
-        RAction { text: qsTr("Default order"); checkable: true; checked: root.library.sortCriteria === ""; onTriggered: root.library.sortCriteria = "" }
-        RAction { text: qsTr("Name"); checkable: true; checked: root.library.sortCriteria === "title"; onTriggered: root.library.sortCriteria = "title" }
-        RAction { text: qsTr("Duration"); checkable: true; checked: root.library.sortCriteria === "duration"; onTriggered: root.library.sortCriteria = "duration" }
-        RAction { text: qsTr("Date added"); checkable: true; checked: root.library.sortCriteria === "insertion"; onTriggered: root.library.sortCriteria = "insertion" }
-        RMenuSeparator { }
-        RAction {
-            text: root.library.sortOrder === Qt.AscendingOrder ? qsTr("Ascending") : qsTr("Descending")
-            iconName: root.library.sortOrder === Qt.AscendingOrder ? "arrow_up" : "arrow_down"
-            onTriggered: root.library.sortOrder = root.library.sortOrder === Qt.AscendingOrder ? Qt.DescendingOrder : Qt.AscendingOrder
+        Instantiator {
+            model: root.library.sortOptions
+            delegate: RAction {
+                required property var modelData
+                text: modelData.text
+                checkable: true
+                checked: root.library.sortCriteria === modelData.key && root.library.sortOrder === modelData.order
+                onTriggered: {
+                    root.library.sortCriteria = modelData.key
+                    root.library.sortOrder = modelData.order
+                }
+            }
+            onObjectAdded: (index, object) => sortMenu.insertAction(index, object)
+            onObjectRemoved: (index, object) => sortMenu.removeAction(object)
         }
     }
 
     RMenu {
         id: pageMenu
+        RAction { iconName: "add"; text: qsTr("Pin to sidebar"); enabled: root.library.route.params.tree === undefined; onTriggered: root.library.pinCurrent() }
         RAction { iconName: "add"; text: qsTr("Add a folder to the library"); onTriggered: root.library.parent && addFolderProxy() }
         RAction { iconName: "refresh"; text: qsTr("Rescan the library"); onTriggered: MainCtx.mediaLibraryAvailable && rescan.item && rescan.item.reload() }
         RAction { iconName: "settings_2t"; text: qsTr("Library settings"); onTriggered: RWindows.settingsRequested("library") }

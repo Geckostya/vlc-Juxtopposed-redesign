@@ -21,7 +21,7 @@ import QtQuick.Templates as T
 T.MenuItem {
     id: root
 
-    property string iconName: action && action.iconName !== undefined ? action.iconName : ""
+    property string iconName: action && action.iconName !== undefined ? action.iconName : subMenu && subMenu.iconName !== undefined ? subMenu.iconName : ""
     property string shortcutText: action && action.shortcutText !== undefined ? action.shortcutText : ""
 
     implicitWidth: Math.max(Theme.dp(244), leftPadding + Theme.iconSize + Theme.dp(14) + label.implicitWidth
@@ -44,7 +44,14 @@ T.MenuItem {
         name: "chevron_right"
     }
 
-    indicator: Item {}
+    indicator: RIcon {
+        x: root.width - width - Theme.dp(16)
+        y: (root.height - height) / 2
+        visible: root.checkable && root.checked
+        name: "check"
+        size: Theme.iconSizeSmall
+        color: Theme.accent
+    }
 
     contentItem: Item {
         RIcon {
@@ -59,6 +66,8 @@ T.MenuItem {
             id: label
             anchors.left: parent.left
             anchors.leftMargin: Theme.iconSize + Theme.dp(14)
+            anchors.right: shortcut.left
+            anchors.rightMargin: Theme.dp(32)
             anchors.verticalCenter: parent.verticalCenter
             text: root.text
             font.pixelSize: Theme.fontSizeLarge - Theme.dp(1)
@@ -68,8 +77,9 @@ T.MenuItem {
             id: shortcut
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            visible: !root.subMenu
+            visible: !root.subMenu && !root.checked
             text: root.shortcutText
+            width: Math.max(implicitWidth, root.checked ? Theme.iconSize : 0)
             color: Theme.textDim
             font.pixelSize: Theme.fontSize
         }

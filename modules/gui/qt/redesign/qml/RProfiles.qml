@@ -39,12 +39,38 @@ QtObject {
     property string current: String(MainCtx.settingValue("Redesign/profile", ""))
 
     function snapshot() {
-        return { theme: Theme.mode, accent: Theme.accentSetting, extras: RBarCatalog.extras }
+        return { theme: Theme.mode, accent: Theme.accentSetting, extras: RBarCatalog.extras, topExtras: RBarCatalog.topExtras, options: RedesignSettings.snapshot(), playback: RPresets.capture() }
     }
 
     function key(name) {
         return "Redesign/profiles/" + encodeURIComponent(name)
     }
+
+    property bool applying: false
+    property Timer saveTimer: Timer { interval: 500; onTriggered: root.saveCurrent() }
+    function saveCurrent() {
+        if (!applying && current.length > 0)
+            MainCtx.setSettingValue(key(current), JSON.stringify(snapshot()))
+    }
+    property Connections configChanges: Connections {
+        target: RedesignSettings
+        function onValueChanged(name) { if (!root.applying) root.saveTimer.restart() }
+    }
+    property Connections effectChanges: Connections {
+        target: RedesignEffects
+        function onChanged() { if (!root.applying) root.saveTimer.restart() }
+    }
+    property Connections themeChanges: Connections {
+        target: Theme
+        function onModeChanged() { root.saveTimer.restart() }
+        function onAccentSettingChanged() { root.saveTimer.restart() }
+    }
+    property Connections barChanges: Connections {
+        target: RBarCatalog
+        function onExtrasChanged() { root.saveTimer.restart() }
+        function onTopExtrasChanged() { root.saveTimer.restart() }
+    }
+    Component.onDestruction: saveCurrent()
 
     function select(name) {
         if (name === current)
@@ -55,14 +81,19 @@ QtObject {
         try {
             s = JSON.parse(String(MainCtx.settingValue(key(name), "")))
         } catch (e) { }
+        applying = true
         if (s) {
+            if (s.options) RedesignSettings.restore(s.options)
+            if (s.playback) RPresets.applySnapshot(s.playback, "")
             Theme.setMode(s.theme || "dark")
             Theme.setAccent(s.accent || "")
             RBarCatalog.setExtras(Array.isArray(s.extras) ? s.extras : [])
+            RBarCatalog.setTopExtras(Array.isArray(s.topExtras) ? s.topExtras : [])
         } else {
             // a profile used for the first time starts from the current look
             MainCtx.setSettingValue(key(name), JSON.stringify(snapshot()))
         }
+        applying = false
         current = name
         MainCtx.setSettingValue("Redesign/profile", name)
     }

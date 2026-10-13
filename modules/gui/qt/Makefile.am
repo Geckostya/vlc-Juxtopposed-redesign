@@ -1528,6 +1528,7 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RAccentPicker.qml \
 	redesign/qml/RAction.qml \
 	redesign/qml/RAddSubtitlesDialog.qml \
+	redesign/qml/RAddToPlaylistDialog.qml \
 	redesign/qml/RAdvancedOptions.qml \
 	redesign/qml/RAudioEffects.qml \
 	redesign/qml/RBarItem.qml \
@@ -1556,12 +1557,14 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RLibNetworkPage.qml \
 	redesign/qml/RLibPlaylistsPage.qml \
 	redesign/qml/RLibRecentPage.qml \
+	redesign/qml/RLibStreams.qml \
 	redesign/qml/RLibVideosPage.qml \
 	redesign/qml/RLibraryFolders.qml \
 	redesign/qml/RLibraryHeader.qml \
 	redesign/qml/RLibraryRescan.qml \
 	redesign/qml/RLibrarySidebar.qml \
 	redesign/qml/RLibraryView.qml \
+	redesign/qml/RLibraryWindow.qml \
 	redesign/qml/RMainInterface.qml \
 	redesign/qml/RMainMenu.qml \
 	redesign/qml/RMediaMenu.qml \
@@ -1579,6 +1582,7 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RPlaybackPopup.qml \
 	redesign/qml/RPlayerView.qml \
 	redesign/qml/RPlaylistSaver.qml \
+	redesign/qml/RPresetPicker.qml \
 	redesign/qml/RProfileMenu.qml \
 	redesign/qml/RQueueItem.qml \
 	redesign/qml/RQueuePanel.qml \
@@ -1606,6 +1610,7 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RSettingsVideo.qml \
 	redesign/qml/RSettingsWindow.qml \
 	redesign/qml/RShortcutsWindow.qml \
+	redesign/qml/RSubtitleTimeline.qml \
 	redesign/qml/RSwitch.qml \
 	redesign/qml/RTabBar.qml \
 	redesign/qml/RText.qml \
@@ -1623,6 +1628,7 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RWindowButton.qml
 libqml_module_redesign_a_Singleton_QML = \
 	redesign/qml/RBarCatalog.qml \
+	redesign/qml/RPresets.qml \
 	redesign/qml/RProfiles.qml \
 	redesign/qml/RWindows.qml \
 	redesign/qml/Theme.qml

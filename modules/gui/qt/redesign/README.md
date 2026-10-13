@@ -1,10 +1,10 @@
 # VLC redesign (Qt Quick)
 
 This folder holds a new interface for the Qt module, written from scratch to
-follow the community redesign made by Juxtopposed. The C++ side of
-the Qt module is reused as is. That covers `Player`, `MainPlaylistController`,
-the media library models, `DialogsProvider` and the video compositors. Only
-the QML layer is new.
+follow the community redesign made by Juxtopposed. The Qt module keeps its native playback and video compositor architecture.
+Small C++ bridges expose configuration snapshots, subtitle cues, external tracks
+and media-library collection operations to the redesign. That covers `Player`, `MainPlaylistController`,
+the media library models, `DialogsProvider` and the video compositors. The classic QML interface remains available.
 
 * `qml/`: the `VLC.Redesign` QML module, with `RMainInterface.qml` as its root
 * `icons/`: the icon set exported from the Figma file. Main color is
@@ -18,13 +18,18 @@ redesigned interface*, to get the classic interface back.
 
 ## Status
 
-| Stage | Content | State |
-|-------|---------|-------|
-| 1 | Theme, icons, top bar, control bar (thick seek bar, cone volume), tracks popup (video / audio / subtitles), playback popup, queue / bookmarks / chapters panel, main menu, right click menu, auto hiding bars | done |
-| 2 | Library sidebar (compact and full), home page, music player view, miniplayer | todo |
-| 3 | Settings window (19 screens), keyboard shortcuts window | todo |
-| 4 | Dialogs: add subtitles to folder / playlist, open network stream, new playlist | todo |
-| 5 | Onboarding, layout customization, profiles | todo |
+| Area | Implemented |
+|------|-------------|
+| Player | Floating controls, music cover view, queue/bookmarks/chapters, hide UI, compact topmost player with a separate library window |
+| Library | Home/videos/music/network/playlists/recent, nested folders, compact sidebar, pins, search, sorting and persistent grid/list choices |
+| Media actions | Play/enqueue, favorites, watched state, playlist membership/rename/delete/export, native streaming/conversion and metadata, external subtitle/audio matching |
+| Settings | 13 categories, expanded native options, shortcuts, light/dark/system themes and accent |
+| Effects | Audio/video filters, native HDR tone mapping when available, visualizer, named playback/effect presets, SRT/WebVTT synchronization timeline |
+| Personalization | Onboarding, top/control bar customization and profiles including VLC options and live playback/effect state |
+
+Windows verification and native-engine adaptations are recorded in
+`redesign-dev/REDESIGN-ACCEPTANCE.md`. Hardware HDR and the DirectComposition
+video path require a display-based playback check; offscreen QA does not prove them.
 
 ## Design tokens
 

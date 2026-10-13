@@ -39,7 +39,8 @@ Item {
 
     width: parent ? parent.width : implicitWidth
     implicitWidth: Theme.dp(320)
-    height: Theme.dp(40)
+    visible: module.length > 0 ? RedesignSettings.moduleAvailable(module) : RedesignSettings.option(option).exists
+    height: visible ? Theme.dp(40) : 0
     Component.onCompleted: reload()
 
     RText {

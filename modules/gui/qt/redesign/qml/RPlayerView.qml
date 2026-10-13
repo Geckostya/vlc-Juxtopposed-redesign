@@ -40,11 +40,12 @@ FocusScope {
 
     // page: "" (last page) or a library page ("videos"...)
     signal libraryRequested(string page)
+    signal sidebarRequested()
 
     onMiniChanged: if (mini) openPanel = ""
 
     // bars are pinned while nothing plays, a panel is open or a menu is shown
-    readonly property bool pinned: !hasVideo || !playing || openPanel !== ""
+    readonly property bool pinned: MainCtx.pinVideoControls || !hasVideo || !playing || openPanel !== ""
                                    || mainMenu.visible || contextMenu.visible
                                    || topBar.hovered || controlBar.hovered
 
@@ -109,7 +110,7 @@ FocusScope {
     // idle / audio only background
     RIdleView {
         anchors.fill: parent
-        visible: !root.hasVideo
+        visible: !root.hasVideo && !root.mini
     }
 
     HoverHandler {
@@ -193,7 +194,7 @@ FocusScope {
             const parts = u.split("/")
             return parts.length > 1 ? decodeURIComponent(parts[parts.length - 2]) : qsTr("Library")
         }
-        onSidebarToggled: root.libraryRequested("")
+        onSidebarToggled: root.sidebarRequested()
         onLocationClicked: root.libraryRequested("videos")
     }
 
@@ -237,6 +238,7 @@ FocusScope {
     }
 
     RPlaybackPopup {
+        height: Math.min(implicitHeight, Math.max(0, root.height - topBar.height - controlBar.height - 2 * Theme.margin))
         anchors.right: parent.right
         anchors.rightMargin: Theme.margin + Theme.dp(42)
         anchors.bottom: controlBar.top

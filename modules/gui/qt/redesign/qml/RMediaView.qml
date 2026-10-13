@@ -32,6 +32,7 @@ GridView {
     property string currentMrl: ""
 
     signal activated(int index, var item)
+    signal enqueueRequested(int index, var item)
     signal contextMenuRequested(int index, var item, point globalPos)
 
     readonly property int columns: grid ? Math.max(1, Math.floor((width + Theme.dp(20)) / (square ? Theme.dp(220) : Theme.dp(336))))
@@ -82,6 +83,23 @@ GridView {
         hoverEnabled: true
         onClicked: root.activated(index, model)
         Accessible.name: root.titleOf(model)
+        function enqueueForDrop() { root.enqueueRequested(index, model) }
+        Item {
+            id: dragProxy
+            parent: cell
+            x: mediaDrag.centroid.position.x
+            y: mediaDrag.centroid.position.y
+            width: 1; height: 1
+            Drag.active: false
+            Drag.keys: ["vlc-redesign-media"]
+            Drag.source: cell
+        }
+        DragHandler {
+            id: mediaDrag
+            target: null
+            acceptedButtons: Qt.LeftButton
+            onActiveChanged: { if (active) dragProxy.Drag.active = true; else dragProxy.Drag.drop() }
+        }
 
         TapHandler {
             acceptedButtons: Qt.RightButton
@@ -104,6 +122,7 @@ GridView {
                 border.color: cell.hovered ? Theme.p.dividerBright : "transparent"
 
                 Image {
+                    id: tileImage
                     anchors.fill: parent
                     source: cell.image
                     visible: cell.image.length > 0 && status === Image.Ready
@@ -114,7 +133,7 @@ GridView {
                 }
                 RIcon {
                     anchors.centerIn: parent
-                    visible: cell.image.length === 0
+                    visible: tileImage.status !== Image.Ready
                     name: cell.model.isVideo === false ? "music" : cell.model.isVideo === true ? "video" : root.fallbackIcon
                     size: Theme.dp(40)
                     color: Theme.textDim
@@ -175,6 +194,7 @@ GridView {
                 color: Theme.p.bgA1
                 clip: true
                 Image {
+                    id: smallImage
                     anchors.fill: parent
                     source: cell.image
                     visible: cell.image.length > 0 && status === Image.Ready
@@ -185,7 +205,7 @@ GridView {
                 }
                 RIcon {
                     anchors.centerIn: parent
-                    visible: cell.image.length === 0
+                    visible: smallImage.status !== Image.Ready
                     name: cell.current ? "playing" : root.fallbackIcon
                     size: Theme.iconSizeSmall
                     color: cell.current ? Theme.accent : Theme.textDim

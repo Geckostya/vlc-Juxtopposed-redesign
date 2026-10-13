@@ -49,7 +49,7 @@ Item {
         case "snapshot": Player.snapshot(); break
         case "effects": RWindows.effectsRequested(0); break
         case "equalizer": RWindows.effectsRequested(1); break
-        case "fullscreen": Player.toggleFullscreen(); break
+        case "fullscreen": MainCtx.toggleInterfaceFullScreen(); break
         case "library": RWindows.libraryRequested("home"); break
         case "settings": DialogsProvider.prefsDialog(); break
         case "quit": DialogsProvider.quit(); break

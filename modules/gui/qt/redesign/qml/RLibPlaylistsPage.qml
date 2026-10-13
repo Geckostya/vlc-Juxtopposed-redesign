@@ -26,10 +26,16 @@ Item {
     id: root
 
     property var library
-    readonly property var params: library ? library.route.params : ({})
+    readonly property var params: {
+        const p = library ? library.route.params : ({})
+        return typeof p.id === "string" ? Object.assign({}, p, { id: MediaLib.deserializeMlItemIdFromString(p.id) }) : p
+    }
     readonly property bool inPlaylist: params.id !== undefined
 
     Binding { target: root.library; property: "itemCount"; value: root.inPlaylist ? content.count : playlists.count; when: !!root.library }
+
+    Binding { target: root.library; property: "sortKeys"; when: !!root.library
+        value: root.inPlaylist ? [{ key: "title", text: qsTr("Title") }, { key: "duration", text: qsTr("Duration") }, { key: "playcount", text: qsTr("Watched") }] : [] }
 
     MLPlaylistListModel {
         id: playlists
@@ -43,6 +49,8 @@ Item {
         ml: MediaLib
         parentId: root.inPlaylist ? root.params.id : MediaLib.deserializeMlItemIdFromString("")
         searchPattern: root.library ? root.library.searchPattern : ""
+        sortCriteria: root.library ? root.library.sortCriteria : ""
+        sortOrder: root.library ? root.library.sortOrder : Qt.AscendingOrder
     }
 
     Row {
@@ -65,13 +73,14 @@ Item {
         fallbackIcon: root.inPlaylist ? "file" : "playlist"
         model: root.inPlaylist ? content : playlists
         currentMrl: Player.isStarted ? String(Player.url) : ""
+        onEnqueueRequested: (index, item) => MediaLib.addToPlaylist(item.id)
         onActivated: (index, item) => {
             if (root.inPlaylist)
                 MediaLib.addAndPlay(item.id)
             else
                 root.library.openChild(item.name, { id: item.id })
         }
-        onContextMenuRequested: (index, item, pos) => menu.openFor(item, pos, !root.inPlaylist)
+        onContextMenuRequested: (index, item, pos) => { menu.itemIndex = index; menu.openFor(item, pos, !root.inPlaylist) }
     }
 
     RText {
@@ -81,5 +90,27 @@ Item {
         color: Theme.textDim
     }
 
-    RMediaMenu { id: menu }
+    RDialogWindow {
+        id: deleteDialog
+        property var playlistId
+        heading: qsTr("Delete playlist")
+        acceptText: qsTr("Delete playlist")
+        width: Theme.dp(480); height: Theme.dp(240)
+        onAccepted: playlists.deletePlaylists([playlistId])
+        RText { anchors.fill: parent; wrapMode: Text.Wrap; text: qsTr("Delete this playlist from the library? Your media files will stay on disk.") }
+    }
+    RMediaMenu {
+        id: menu
+        RMenuSeparator { visible: !root.inPlaylist }
+        RAction {
+            text: qsTr("Rename playlist")
+            enabled: !root.inPlaylist
+            onTriggered: playlists.showDialogRename(playlists.index(menu.itemIndex, 0))
+        }
+        RAction {
+            text: qsTr("Delete playlist")
+            enabled: !root.inPlaylist
+            onTriggered: { deleteDialog.playlistId = menu.item.id; deleteDialog.open() }
+        }
+    }
 }

@@ -8,7 +8,15 @@ import os
 import re
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'modules', 'gui', 'qt')
-SINGLETONS = ['Theme.qml', 'RWindows.qml', 'RBarCatalog.qml', 'RProfiles.qml']
+SINGLETONS = ['Theme.qml', 'RWindows.qml', 'RBarCatalog.qml', 'RProfiles.qml', 'RPresets.qml']
+
+
+def write_if_changed(path, content):
+    with open(path, encoding='utf-8', newline='') as f:
+        if f.read() == content:
+            return
+    with open(path, 'w', encoding='utf-8', newline='') as f:
+        f.write(content)
 
 
 def main():
@@ -26,8 +34,7 @@ def main():
     sources = ''.join(f"        'redesign/qml/{x}',{nl}" for x in files)
     singles = ''.join(f"        'redesign/qml/{x}',{nl}" for x in singletons)
     s = s[:m.start()] + m.group(1) + sources + m.group(3) + singles + m.group(5) + s[m.end():]
-    with open(path, 'w', encoding='utf-8', newline='') as f:
-        f.write(s)
+    write_if_changed(path, s)
 
     path = os.path.join(ROOT, 'Makefile.am')
     with open(path, encoding='utf-8', newline='') as f:
@@ -41,8 +48,7 @@ def main():
         return (' \\' + nl).join('\tredesign/qml/' + x for x in items) + nl
 
     s = s[:m.start()] + m.group(1) + lst(files) + m.group(3) + lst(singletons) + m.group(5) + s[m.end():]
-    with open(path, 'w', encoding='utf-8', newline='') as f:
-        f.write(s)
+    write_if_changed(path, s)
     print(f'{len(files)} files, {len(singletons)} singletons')
 
 

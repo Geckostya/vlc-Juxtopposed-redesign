@@ -83,6 +83,10 @@ Item {
         const open = RedesignSettings.inheritedString("qt-redesign-open")
         if (open.startsWith("settings"))
             Qt.callLater(root.openSettings, open.split(":")[1] || "")
+        else if (open === "mini")
+            Qt.callLater(root.enterMiniPlayer)
+        else if (open === "timeline")
+            Qt.callLater(RWindows.subtitleTimelineRequested)
         else if (open === "shortcuts")
             Qt.callLater(root.openShortcuts)
         else if (open === "network")
@@ -111,22 +115,77 @@ Item {
             Qt.callLater(playerView.openEffects, open === "effects:audio" ? 1 : 0)
     }
 
+    Loader { id: detachedLibraryLoader; active: false; sourceComponent: RLibraryWindow { } }
+    Loader { id: timelineLoader; active: false; sourceComponent: RSubtitleTimeline { transientParent: root.Window.window } }
+
     Loader { id: customizeLoader; active: false; sourceComponent: RCustomizeDialog { transientParent: root.Window.window } }
     Loader { id: networkLoader; active: false; sourceComponent: RNetworkStreamDialog { transientParent: root.Window.window } }
+    Loader { id: addToPlaylistLoader; active: false; source: "" }
     Loader { id: newPlaylistLoader; active: false; sourceComponent: RNewPlaylistDialog { transientParent: root.Window.window } }
+    Loader { id: addAudioLoader; active: false; sourceComponent: RAddSubtitlesDialog { audioMode: true; transientParent: root.Window.window } }
     Loader { id: addSubtitlesLoader; active: false; sourceComponent: RAddSubtitlesDialog { transientParent: root.Window.window } }
 
     Connections {
         target: RWindows
         function onSettingsRequested(category) { root.openSettings(category) }
+        function onSubtitleTimelineRequested() { timelineLoader.active = true; timelineLoader.item.open() }
         function onShortcutsRequested() { root.openShortcuts() }
         function onEffectsRequested(tab) { root.libraryMode = false; playerView.openEffects(tab) }
         function onPanelRequested(name, tab) { root.libraryMode = false; playerView.togglePanel(name, tab) }
-        function onLibraryRequested(page) { root.libraryMode = true; library.openPage(page) }
+        function onLibraryRequested(page) {
+            if (root.compactMode) {
+                detachedLibraryLoader.active = true
+                detachedLibraryLoader.item.openPage(page)
+            } else {
+                root.sidebarVisible = false
+                root.libraryMode = true
+                library.openPage(page)
+            }
+        }
+        function onMiniPlayerRequested() { root.enterMiniPlayer() }
         function onCustomizeRequested() { customizeLoader.active = true; customizeLoader.item.open() }
         function onNetworkStreamRequested() { networkLoader.active = true; networkLoader.item.open() }
+        function onAddToPlaylistRequested(ids) {
+            if (!MainCtx.mediaLibraryAvailable) return
+            addToPlaylistLoader.active = false
+            addToPlaylistLoader.setSource("RAddToPlaylistDialog.qml", { transientParent: root.Window.window, mediaIds: ids })
+            addToPlaylistLoader.active = true
+            addToPlaylistLoader.item.open()
+        }
         function onNewPlaylistRequested() { newPlaylistLoader.active = true; newPlaylistLoader.item.open() }
+        function onAddAudioToMediaRequested(urls) { addAudioLoader.active = true; addAudioLoader.item.openForMedia(urls) }
+        function onAddSubtitlesToMediaRequested(urls) { addSubtitlesLoader.active = true; addSubtitlesLoader.item.openForMedia(urls) }
         function onAddSubtitlesRequested(url) { addSubtitlesLoader.active = true; addSubtitlesLoader.item.openFor(url) }
+    }
+
+    // Restore explicit per-file subtitle associations when the same media is opened again.
+    Timer {
+        id: subtitleAssociation
+        interval: 200
+        repeat: true
+        property int attempts: 0
+        property bool subtitleApplied: false
+        property bool audioApplied: false
+        onTriggered: {
+            const url = String(Player.url || "")
+            const subtitle = String(MainCtx.settingValue("Redesign/subtitlePairs/" + encodeURIComponent(url), ""))
+            const audio = String(MainCtx.settingValue("Redesign/audioPairs/" + encodeURIComponent(url), ""))
+            if (Player.isStarted) {
+                if (subtitle.length && !subtitleApplied) subtitleApplied = RedesignEffects.associateSubtitleFile(subtitle)
+                if (audio.length && !audioApplied) audioApplied = RedesignEffects.associateAudioFile(audio)
+            }
+            if (++attempts > 5 || ((!subtitle.length || subtitleApplied) && (!audio.length || audioApplied))) stop()
+        }
+    }
+    Connections {
+        target: Player
+        function onInputChanged(hasInput) {
+            subtitleAssociation.stop()
+            subtitleAssociation.attempts = 0
+            subtitleAssociation.subtitleApplied = false
+            subtitleAssociation.audioApplied = false
+            if (hasInput) subtitleAssociation.start()
+        }
     }
 
     // keep VLCStyle informed, some C++ helpers (tooltips, popups) rely on it
@@ -176,7 +235,7 @@ Item {
             if (urls.length === 0)
                 return
             // a single subtitle file dropped while playing is attached to the media
-            if (Player.isStarted && urls.length === 1 && Player.associateSubtitleFile(urls[0])) {
+            if (Player.isStarted && urls.length === 1 && RedesignEffects.associateSubtitleFile(urls[0])) {
                 drop.accept()
                 return
             }
@@ -186,39 +245,94 @@ Item {
     }
 
     // ---- library / player
+    property bool sidebarVisible: false
     property bool libraryMode: false
+    property bool compactMode: false
+    property bool compactQueue: false
+    property var savedWindow: null
+    readonly property rect compactVideo: Qt.rect(Theme.dp(8), compactQueue ? height * 0.45 : Theme.dp(8), width - Theme.dp(16), (compactQueue ? height * 0.55 : height) - Theme.dp(146))
+    function enterMiniPlayer() {
+        if (compactMode) return
+        const w = root.Window.window
+        savedWindow = { x: w.x, y: w.y, width: w.width, height: w.height, visibility: w.visibility,
+                        minimal: MainCtx.minimalView, onTop: MainCtx.interfaceAlwaysOnTop }
+        w.showNormal()
+        MainCtx.minimalView = true
+        MainCtx.interfaceAlwaysOnTop = true
+        libraryMode = false
+        sidebarVisible = false
+        compactMode = true
+        w.width = Theme.dp(400)
+        w.height = Theme.dp(370)
+    }
+    function leaveMiniPlayer() {
+        if (!compactMode) return
+        compactMode = false
+        compactQueue = false
+        if (detachedLibraryLoader.item) detachedLibraryLoader.item.close()
+        const w = root.Window.window, s = savedWindow
+        MainCtx.minimalView = s.minimal
+        MainCtx.interfaceAlwaysOnTop = s.onTop
+        w.x = s.x; w.y = s.y; w.width = s.width; w.height = s.height
+        if (s.visibility === Window.Maximized) w.showMaximized()
+        else if (s.visibility === Window.FullScreen) w.showFullScreen()
+    }
 
     RLibraryView {
         id: library
-        anchors.fill: parent
-        visible: root.libraryMode
-        onBackToPlayer: root.libraryMode = false
+        z: root.sidebarVisible && !root.libraryMode ? 5 : 0
+        x: 0
+        y: compact ? Theme.topBarHeight : 0
+        width: compact ? Math.min(root.width * 0.65, Theme.dp(720)) : root.width
+        height: compact ? root.height - Theme.topBarHeight - Theme.controlBarHeight : root.height
+        compact: root.sidebarVisible && !root.libraryMode
+        visible: root.libraryMode || root.sidebarVisible
+        onExpandLibrary: { root.sidebarVisible = false; root.libraryMode = true }
+        onBackToPlayer: { root.libraryMode = false; root.sidebarVisible = false }
     }
 
     // card of the mini player, around the video shown by playerView
     RMiniPlayer {
-        visible: root.libraryMode && Player.isStarted
-        videoRect: library.miniPlayerRect
-        onExpandRequested: root.libraryMode = false
-        onQueueRequested: { root.libraryMode = false; playerView.togglePanel("queue", 0) }
+        visible: (root.libraryMode || root.compactMode) && Player.isStarted
+        videoRect: root.compactMode ? root.compactVideo : library.miniPlayerRect
+        onLibraryRequested: RWindows.libraryRequested("home")
+        onExpandRequested: { root.leaveMiniPlayer(); root.libraryMode = false }
+        onQueueRequested: { if (root.compactMode) root.compactQueue = !root.compactQueue; else { root.libraryMode = false; playerView.togglePanel("queue", 0) } }
     }
 
     RPlayerView {
         id: playerView
         focus: !root.libraryMode
-        mini: root.libraryMode
-        visible: !root.libraryMode || Player.isStarted
-        x: root.libraryMode ? library.miniPlayerRect.x : 0
-        y: root.libraryMode ? library.miniPlayerRect.y : 0
-        width: root.libraryMode ? library.miniPlayerRect.width : root.width
-        height: root.libraryMode ? library.miniPlayerRect.height : root.height
+        mini: root.libraryMode || root.compactMode
+        visible: (!root.libraryMode || Player.isStarted) && (!(root.compactMode || root.libraryMode) || MainCtx.hasEmbededVideo)
+        x: root.compactMode ? root.compactVideo.x : root.libraryMode ? library.miniPlayerRect.x : 0
+        y: root.compactMode ? root.compactVideo.y : root.libraryMode ? library.miniPlayerRect.y : 0
+        width: root.compactMode ? root.compactVideo.width : root.libraryMode ? library.miniPlayerRect.width : root.width
+        height: root.compactMode ? root.compactVideo.height : root.libraryMode ? library.miniPlayerRect.height : root.height
+        onSidebarRequested: { root.sidebarVisible = !root.sidebarVisible; root.libraryMode = false }
         onLibraryRequested: (page) => {
+            root.sidebarVisible = false
             root.libraryMode = true
             if (page.length > 0)
                 library.openPage(page)
         }
 
     }
+
+    RQueuePanel {
+        visible: root.compactMode && root.compactQueue
+        width: parent.width
+        height: root.compactVideo.y - Theme.dp(8)
+    }
+    Row {
+        visible: root.compactMode
+        z: 10
+        anchors.right: parent.right
+        RIconButton { iconName: "fullscreen"; toolTip: qsTr("Restore player"); onClicked: root.leaveMiniPlayer() }
+        RIconButton { iconName: "close"; toolTip: qsTr("Close mini player"); onClicked: { MainPlaylistController.stop(); root.leaveMiniPlayer() } }
+    }
+    DragHandler { enabled: root.compactMode; target: null; onActiveChanged: if (active) root.Window.window.startSystemMove() }
+    Shortcut { sequence: "Esc"; enabled: root.compactMode; onActivated: root.leaveMiniPlayer() }
 
     // first start: welcome, theme and accent, basic shortcuts
     Loader {
@@ -247,6 +361,8 @@ Item {
         asynchronous: true
         source: "qrc:///qt/qml/VLC/Menus/GlobalShortcuts.qml"
     }
+
+    Component.onDestruction: if (compactMode) leaveMiniPlayer()
 
     // resize handles on the window border when using client side decorations
     Loader {

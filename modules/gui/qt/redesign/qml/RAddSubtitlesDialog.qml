@@ -26,16 +26,28 @@ import VLC.Player
 RDialogWindow {
     id: root
 
+    property bool audioMode: false
     readonly property var videoExtensions: ["mp4", "mkv", "avi", "mov", "wmv", "m4v", "webm", "ts", "m2ts", "mpg", "mpeg", "flv", "ogv", "3gp"]
-    readonly property var subtitleExtensions: ["srt", "ass", "ssa", "sub", "vtt", "idx", "smi"]
+    readonly property var subtitleExtensions: audioMode ? ["mp3", "wav", "flac", "aac", "m4a", "ogg", "opus", "ac3", "dts"] : ["srt", "ass", "ssa", "sub", "vtt", "idx", "smi"]
 
     property string videoDir: ""          // URL of the folder of the videos
     property string subtitleDir: ""       // URL of the folder of the subtitles
+    property var sourceVideos: []
     property var videos: []
     property var subtitles: []
     property var pairs: []                // [{ video, videoName, subtitle, subtitleName }]
 
+    function openForMedia(urls) {
+        sourceVideos = urls.map(u => String(u))
+        videoDir = sourceVideos.length ? RedesignSettings.directoryOf(sourceVideos[0]) : ""
+        subtitleDir = videoDir
+        sourceBox.currentIndex = 0
+        reload()
+        open()
+    }
+
     function openFor(mediaUrl) {
+        sourceVideos = []
         videoDir = RedesignSettings.directoryOf(String(mediaUrl || ""))
         subtitleDir = videoDir
         sourceBox.currentIndex = 0
@@ -56,7 +68,8 @@ RDialogWindow {
     function stem(name) { return name.replace(/\.[^.]+$/, "").toLowerCase() }
 
     function reload() {
-        videos = videoDir ? RedesignSettings.listFiles(videoDir, videoExtensions) : []
+        videos = sourceVideos.length ? sourceVideos.map(url => ({ url: url, name: decodeURIComponent(url.split("/").pop()) }))
+                                    : videoDir ? RedesignSettings.listFiles(videoDir, videoExtensions) : []
         subtitles = subtitleDir ? RedesignSettings.listFiles(subtitleDir, subtitleExtensions) : []
         const used = {}
         const out = []
@@ -75,7 +88,7 @@ RDialogWindow {
     }
 
     function chooseSubtitle(index) {
-        const files = RedesignSettings.browseFiles(qsTr("Select a subtitle file"))
+        const files = RedesignSettings.browseFiles(root.audioMode ? qsTr("Select an audio file") : qsTr("Select a subtitle file"))
         if (files.length === 0)
             return
         const p = pairs.slice()
@@ -83,8 +96,8 @@ RDialogWindow {
         pairs = p
     }
 
-    heading: qsTr("Add Subtitles")
-    acceptText: qsTr("Play with subtitles")
+    heading: audioMode ? qsTr("Add Audio Tracks") : qsTr("Add Subtitles")
+    acceptText: audioMode ? qsTr("Play with audio tracks") : qsTr("Play with subtitles")
     acceptEnabled: pairs.some(p => p.subtitle.length > 0)
     width: Theme.dp(1048)
     height: Theme.dp(800)
@@ -92,7 +105,13 @@ RDialogWindow {
     minimumHeight: Theme.dp(420)
     headerExtraHeight: Theme.dp(50)
 
-    onAccepted: RedesignEffects.enqueueWithSubtitles(pairs, true)
+    onAccepted: {
+        for (const pair of pairs) {
+            if (pair.subtitle.length)
+                MainCtx.setSettingValue((root.audioMode ? "Redesign/audioPairs/" : "Redesign/subtitlePairs/") + encodeURIComponent(pair.video), pair.subtitle)
+        }
+        RedesignEffects.enqueueWithSubtitles(root.audioMode ? pairs.map(p => ({ video: p.video, audio: p.subtitle })) : pairs, true)
+    }
 
     headerExtra: [
         Row {
@@ -125,6 +144,7 @@ RDialogWindow {
                 onClicked: {
                     const d = RedesignSettings.browseDirectory("")
                     if (d.length > 0) {
+                        root.sourceVideos = []
                         root.videoDir = "file:///" + d.replace(/\\/g, "/").replace(/^\/+/, "")
                         if (sourceBox.currentValue === "same")
                             root.subtitleDir = root.videoDir
@@ -200,13 +220,13 @@ RDialogWindow {
                 onClicked: root.chooseSubtitle(row.index)
                 background: Rectangle { radius: Theme.radiusSmall; color: subButton.hovered ? Theme.hover : "transparent" }
                 contentItem: Item {
-                    RIcon { id: sIcon; x: Theme.dp(6); anchors.verticalCenter: parent.verticalCenter; name: "subtitle"; size: Theme.iconSizeSmall; color: Theme.textDim }
+                    RIcon { id: sIcon; x: Theme.dp(6); anchors.verticalCenter: parent.verticalCenter; name: root.audioMode ? "audio" : "subtitle"; size: Theme.iconSizeSmall; color: Theme.textDim }
                     RText {
                         anchors.left: sIcon.right
                         anchors.leftMargin: Theme.dp(12)
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        text: row.modelData.subtitleName || qsTr("No subtitle, click to choose one")
+                        text: row.modelData.subtitleName || (root.audioMode ? qsTr("No audio track, click to choose one") : qsTr("No subtitle, click to choose one"))
                         color: row.modelData.subtitleName ? Theme.textItem : Theme.textDim
                     }
                 }

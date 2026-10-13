@@ -36,6 +36,8 @@ Flickable {
 
     Binding { target: root.library; property: "itemCount"; value: continueModel.count + recentModel.count; when: !!root.library }
 
+    Binding { target: root.library; property: "sortKeys"; value: []; when: !!root.library }
+
     MLRecentVideoModel { id: continueModel; ml: MediaLib; limit: 12 }
     MLRecentMediaModel { id: recentModel; ml: MediaLib; limit: 12 }
     MLAudioModel { id: newMusicModel; ml: MediaLib; limit: 12; sortCriteria: "insertion"; sortOrder: Qt.DescendingOrder }
@@ -82,6 +84,7 @@ Flickable {
 
         RMediaView {
             id: row
+            onEnqueueRequested: (index, item) => MediaLib.addToPlaylist(item.id)
             width: parent.width
             height: cellHeight
             flow: GridView.FlowTopToBottom   // a single horizontal row
