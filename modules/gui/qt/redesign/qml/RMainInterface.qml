@@ -96,6 +96,8 @@ Item {
             RBarCatalog.extras = open.substring(7).split(",")
             onboarding.active = false
         }
+        else if (open === "menu")
+            Qt.callLater(playerView.openMenu)
         else if (open === "customize")
             Qt.callLater(RWindows.customizeRequested)
         else if (open === "onboarding")

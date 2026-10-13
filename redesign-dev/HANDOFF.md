@@ -153,7 +153,7 @@ A-B, снимок, запись, реверс), `RQueuePanel` (Queue/Bookmarks/C
 - Хуки: `--qt-redesign-open=onboarding|customize|extras:id1,id2` (последний — без сохранения).
 - Qt-настройки на Windows лежат в `%APPDATA%\vlc\vlc-qt-interface.ini` (путь берётся из
   `config_GetUserDir`, подмена `APPDATA` для теста не помогает).
-- Не сделано: профили (меню «Profile» с наборами настроек), верхняя панель в кастомизации.
+- Не сделано: верхняя панель в кастомизации; профили хранят только вид (тема, акцент, контролы), не опции VLC.
 
 ### Сборка, релиз
 - Нативная сборка под Windows, раздел 4.
@@ -224,13 +224,17 @@ A-B, снимок, запись, реверс), `RQueuePanel` (Queue/Bookmarks/C
 План на остаток лимита, по порядку. Если сессия оборвалась, всё, что не отмечено [x],
 не сделано (проверьте `git log` ветки `redesign/stage1`):
 
-- [ ] «Open Recent» — подменю в меню «…» (Figma `Profiles.png`): последние 10 медиа
+- [x] «Open Recent» (`RRecentMenu.qml`) — подменю в меню «…» (Figma `Profiles.png`): последние 10 медиа
       (`MLRecentMediaModel`, только при медиатеке), пункт «Clear».
-- [ ] Профили — подменю «Profile (<имя>)» в меню «…» (Figma `Profiles.png`): Movies / Shows /
+- [x] Профили (`RProfiles.qml` синглтон, `RProfileMenu.qml`) — подменю «Profile (<имя>)» в меню «…» (Figma `Profiles.png`): Movies / Shows /
       Music / Work + «New». Профиль = снимок настроек редизайна из Qt-настроек (тема, акцент,
       `controlbarExtras`) в группе `Redesign/profiles/<имя>`; переключение применяет снимок,
       текущий сохраняется перед переключением. Опции VLC (vlcrc) профиль пока не трогает.
-- [ ] Обновить этот документ и запушить.
+- [x] Обновить этот документ и запушить.
+
+Сделано и проверено скриншотом меню (хук `--qt-redesign-open=menu`). Не проверено вживую:
+переключение профилей и «New» (диалог ввода имени — `DialogsProvider.getTextDialog`).
+У пунктов-подменю нет иконок (RMenuItem берёт иконку только у RAction).
 
 ## 7. Следующие шаги
 

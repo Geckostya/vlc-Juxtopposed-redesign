@@ -63,6 +63,10 @@ FocusScope {
         tracksPopup.effects = true
     }
 
+    function openMenu() {
+        mainMenu.popup(topBar.menuButton, 0, topBar.menuButton.height + Theme.dp(6))
+    }
+
     function togglePanel(name, tab) {
         if (openPanel === name) {
             openPanel = ""

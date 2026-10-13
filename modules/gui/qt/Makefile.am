@@ -1579,8 +1579,10 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RPlaybackPopup.qml \
 	redesign/qml/RPlayerView.qml \
 	redesign/qml/RPlaylistSaver.qml \
+	redesign/qml/RProfileMenu.qml \
 	redesign/qml/RQueueItem.qml \
 	redesign/qml/RQueuePanel.qml \
+	redesign/qml/RRecentMenu.qml \
 	redesign/qml/RScrollBar.qml \
 	redesign/qml/RSectionHeader.qml \
 	redesign/qml/RSeekBar.qml \
@@ -1621,6 +1623,7 @@ libqml_module_redesign_a_QML = \
 	redesign/qml/RWindowButton.qml
 libqml_module_redesign_a_Singleton_QML = \
 	redesign/qml/RBarCatalog.qml \
+	redesign/qml/RProfiles.qml \
 	redesign/qml/RWindows.qml \
 	redesign/qml/Theme.qml
 libqml_module_redesign_a_SOURCES = $(QML_MODULE_redesign_SRC)

@@ -26,12 +26,21 @@ import VLC.Player
 RMenu {
     id: root
 
+    // "Open Recent" needs the media library: inserted after "Convert" when it is there
+    property Loader recentLoader: Loader {
+        active: MainCtx.mediaLibraryAvailable
+        source: "RRecentMenu.qml"
+        onLoaded: root.insertMenu(6, item)
+    }
+
     RAction { iconName: "file_2t";     text: qsTr("Open File(s)");          shortcutText: "Ctrl + O"; onTriggered: DialogsProvider.simpleOpenDialog() }
     RAction { iconName: "folder_2t";   text: qsTr("Open Folder");           shortcutText: "Ctrl + F"; onTriggered: DialogsProvider.PLOpenDir() }
     RAction { iconName: "streaming_2t";  text: qsTr("Open Network Stream");   shortcutText: "Ctrl + N"; onTriggered: RWindows.networkStreamRequested() }
     RAction { iconName: "disc_2t";     text: qsTr("Open Disc");             shortcutText: "Ctrl + D"; onTriggered: DialogsProvider.openDiscDialog() }
     RAction { iconName: "capture-device_2t";  text: qsTr("Open Capture Device");   shortcutText: "Ctrl + C"; onTriggered: DialogsProvider.openCaptureDialog() }
     RAction { iconName: "swap_2t";  text: qsTr("Convert");               shortcutText: "Ctrl + R"; onTriggered: DialogsProvider.openAndTranscodingDialogs() }
+
+    RProfileMenu { }
 
     RAction { iconName: "playlist_2t"; text: qsTr("New Playlist");          onTriggered: RWindows.newPlaylistRequested(); enabled: MainCtx.mediaLibraryAvailable }
     RAction { iconName: "subtitles_2t"; text: qsTr("Add Subtitles to a Folder"); onTriggered: RWindows.addSubtitlesRequested(Player.isStarted ? String(Player.url) : "") }

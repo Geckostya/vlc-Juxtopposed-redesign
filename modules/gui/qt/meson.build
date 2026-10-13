@@ -922,8 +922,10 @@ qml_modules += {
         'redesign/qml/RPlaybackPopup.qml',
         'redesign/qml/RPlayerView.qml',
         'redesign/qml/RPlaylistSaver.qml',
+        'redesign/qml/RProfileMenu.qml',
         'redesign/qml/RQueueItem.qml',
         'redesign/qml/RQueuePanel.qml',
+        'redesign/qml/RRecentMenu.qml',
         'redesign/qml/RScrollBar.qml',
         'redesign/qml/RSectionHeader.qml',
         'redesign/qml/RSeekBar.qml',
@@ -965,6 +967,7 @@ qml_modules += {
     ),
     'singletons': files(
         'redesign/qml/RBarCatalog.qml',
+        'redesign/qml/RProfiles.qml',
         'redesign/qml/RWindows.qml',
         'redesign/qml/Theme.qml',
     ),
