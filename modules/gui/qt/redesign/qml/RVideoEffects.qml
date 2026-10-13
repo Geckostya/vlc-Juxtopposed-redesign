@@ -126,5 +126,28 @@ Flickable {
             title: qsTr("Crop")
             RCropEditor { width: parent.width }
         }
+
+        // Figma "HDR Options": VLC only has the Direct3D11 output mode (Windows),
+        // it applies when the next video starts
+        RCollapsible {
+            id: hdr
+            property var opt: RedesignSettings.option("d3d11-hdr-mode")
+            visible: opt.exists === true
+            title: qsTr("HDR")
+
+            RDropdown {
+                width: parent.width
+                model: hdr.opt.choices || []
+                Component.onCompleted: selectValue(hdr.opt.value)
+                onPicked: (v) => RedesignSettings.setValue("d3d11-hdr-mode", v)
+            }
+            RText {
+                width: parent.width
+                wrapMode: Text.WordWrap
+                text: qsTr("Applies to the next video.")
+                color: Theme.textDim
+                font.pixelSize: Theme.fontSizeSmall
+            }
+        }
     }
 }
