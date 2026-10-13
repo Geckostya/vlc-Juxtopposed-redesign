@@ -162,7 +162,7 @@ A-B, снимок, запись, реверс), `RQueuePanel` (Queue/Bookmarks/C
   (собран из коммита `8c99ab68f2` — только этап 1).
   **Релиз 0.2.0 опубликован** (2026-10-13, коммит `59d52482b9`: этапы 1–5 без профилей):
   https://github.com/Geckostya/vlc-Juxtopposed-redesign/releases/tag/vlc-redesign-0.2.0
-  (сборка из снимка `git archive HEAD` в `C:\Projects\VLCelease-src`, чтобы не брать
+  (сборка из снимка `git archive HEAD` в `C:\Projects\VLC\release-src`, чтобы не брать
   незакоммиченное; `build.ps1 -Release -Clean` оттуда, затем `package.ps1 -Version X -Commit <hash>`). Следующий релиз: `build.bat -Release`,
   затем `redesign-dev\windows\package.ps1 -Version 0.2.0`, черновик через `gh release create --draft`;
   публикует владелец.
