@@ -56,8 +56,8 @@ Item {
 
     // header state shared with the page
     property bool grid: MainCtx.gridView
-    onGridChanged: MainCtx.gridView = grid
-    Connections { target: MainCtx; function onGridViewChanged() { root.grid = MainCtx.gridView } }
+    onGridChanged: if (MainCtx.gridView !== grid) MainCtx.gridView = grid
+    Connections { target: MainCtx; function onGridViewChanged() { if (root.grid !== MainCtx.gridView) root.grid = MainCtx.gridView } }
     property string searchPattern: ""
     property string sortCriteria: ""
     property int sortOrder: Qt.AscendingOrder

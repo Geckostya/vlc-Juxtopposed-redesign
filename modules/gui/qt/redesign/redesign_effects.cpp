@@ -238,7 +238,9 @@ void RedesignEffects::setAudioValue(const QString &name, const QVariant &value)
 
 bool RedesignEffects::hasAssociatedMedia(const QString &url) const
 {
-    input_item_t *item = THEMIM->getInput();
+    vlc_player_t *player = THEMIM->getPlayer();
+    vlc_player_locker playerLock{player};
+    input_item_t *item = vlc_player_GetCurrentMedia(player);
     if (!item) return false;
     const QUrl wanted(url);
     bool found = false;
@@ -247,6 +249,18 @@ bool RedesignEffects::hasAssociatedMedia(const QString &url) const
         if (QUrl(qfu(item->pp_slaves[i]->psz_uri)).matches(wanted, QUrl::NormalizePathSegments)) {
             found = true;
             break;
+        }
+    }
+    // Explicit input options can be pending while startup loads native slaves.
+    // Do not enqueue the same file again through the per-file restore timer.
+    for (int i = 0; !found && i < item->i_options; ++i) {
+        QString option = qfu(item->ppsz_options[i]);
+        if (option.startsWith(':')) option.remove(0, 1);
+        if (option.startsWith(QLatin1String("sub-file=")))
+            found = QUrl::fromLocalFile(option.mid(9)).matches(wanted, QUrl::NormalizePathSegments);
+        else if (option.startsWith(QLatin1String("input-slave="))) {
+            for (const auto &slave : option.mid(12).split('#'))
+                if (QUrl(slave).matches(wanted, QUrl::NormalizePathSegments)) { found = true; break; }
         }
     }
     vlc_mutex_unlock(&item->lock);
