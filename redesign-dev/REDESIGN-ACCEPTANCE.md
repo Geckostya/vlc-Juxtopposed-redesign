@@ -62,3 +62,21 @@
 Для обычной пересборки: `C:/Projects/vlc/Source/redesign-dev/windows/build.ps1 -Jobs 4`.
 Тестовые scripts используют отдельную runtime копию и не запускают видимый VLC.
 Изменения исходников оставлены незакоммиченными для ревью; classic QML не изменён.
+
+
+## Релиз 0.3.0 опубликован
+
+Публикация проверена через GitHub API: архив и SHA-256 загружены, размеры и server-side digest
+совпадают с локальными файлами. Тег `vlc-redesign-0.3.0` указывает на
+`ae57ab8ce98686b40ddfc788b79c7c09f18001e1`.
+
+https://github.com/Geckostya/vlc-Juxtopposed-redesign/releases/tag/vlc-redesign-0.3.0
+
+Релизная сборка с отключёнными обновлениями прошла 72 проверки на новом пустом portable
+профиле, COMPLETE и exit 0. Исправлены обнаруженные при этом обратная связь grid/list
+и повторное добавление явно заданной внешней дорожки во время старта input.
+ZIP проверен на целостность, 528 файлов совпали с установленной release-сборкой;
+распакованный VLC успешно воспроизвёл WAV с dummy output.
+
+SHA-256 ZIP: `035e48358d90a0975277dada8011c5df1d1a7a3c3f6b523289fea45aa5815a2d`.
+Архив: `C:/Projects/vlc/build/dist/vlc-redesign-0.3.0-win64.zip`.
